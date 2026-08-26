@@ -16,10 +16,13 @@ from lims_assistant.ocr.preprocess import prepare
 class RapidOcrEngine:
     name = "rapidocr"
 
-    def __init__(self, cfg: OcrConfig) -> None:
+    def __init__(self, cfg: OcrConfig, note: str = "") -> None:
         self.cfg = cfg
         self._ocr = None
         self._err = ""
+        # Freitexthinweis fuer die Selbstauskunft (health), z. B. wenn ein
+        # konfiguriertes Zusatzmodell fehlt und die Standardmodelle greifen.
+        self.note = note
 
     def _ensure(self) -> bool:
         if self._ocr is not None:
@@ -41,7 +44,10 @@ class RapidOcrEngine:
     def available(self) -> tuple[bool, str]:
         if self._ensure():
             extra = " (latin-Modell)" if self.cfg.rec_model_path else " (Standardmodelle)"
-            return True, "rapidocr-onnxruntime" + extra
+            detail = "rapidocr-onnxruntime" + extra
+            if self.note:
+                detail += f" - {self.note}"
+            return True, detail
         return False, self._err
 
     def recognize(self, image) -> OcrPageResult:

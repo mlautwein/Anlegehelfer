@@ -2,8 +2,9 @@
 
 [![CI](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml/badge.svg)](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml)
 
-**Version 0.1.0** (Vorabversion - Windows-Build und Excel-2016-Abnahme sind
-offene Gates) · Jobvertrag `1.0` · [Changelog](CHANGELOG.md) ·
+**Version 0.1.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
+offen) · Jobvertrag `1.0` · [Erste Schritte](docs/ERSTE_SCHRITTE.md) ·
+[Changelog](CHANGELOG.md) ·
 [Releases](https://github.com/mlautwein/Anlegehelfer/releases)
 
 > **Source available, nicht Open Source.** Der Quelltext ist oeffentlich
@@ -59,7 +60,18 @@ macOS/Windows Arial). Findet `scripts/make_fixtures.py` keine skalierbare
 Schrift, bricht es mit einer Meldung ab, statt einen unlesbaren Korpus zu
 erzeugen.
 
-## Windows-Bereitstellung (Kurzfassung)
+## Loslegen
+
+Fuer den Einsatz auf einem Windows-Rechner mit Excel fuehrt
+`docs/ERSTE_SCHRITTE.md` von null bis zur ersten Arbeitsliste. Kurzform:
+
+    powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel "C:\LIMS-PA"
+
+Das Skript laedt das aktuelle Release, prueft Pruefsumme und Hash-Manifest,
+schreibt `config.json` und faehrt einen Selbsttest. Danach fehlt nur noch
+die Excel-Mappe (Schritt 2 dort, braucht Excel selbst).
+
+## Windows-Bereitstellung im Detail
 
 1. `packaging/windows/build.ps1` auf einem Windows-11-x64-Rechner ausfuehren
    -> `dist/lims_core/` (portable onedir-EXE inkl. Hash-Manifest).
@@ -116,6 +128,7 @@ Tags mit Suffix werden automatisch als Vorabversion markiert.
 
 | Thema | Datei |
 |---|---|
+| **Einrichtung von null an** | **`docs/ERSTE_SCHRITTE.md`** |
 | Aenderungen je Version | `CHANGELOG.md` |
 | Ausfuehrungsnotiz/Ist-Stand | `docs/AUSFUEHRUNGSNOTIZ.md` |
 | Architektur | `docs/ARCHITEKTUR.md` |

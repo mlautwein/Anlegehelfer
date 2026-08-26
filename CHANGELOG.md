@@ -12,6 +12,15 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ### Hinzugefuegt
 
+- `packaging/windows/einrichten.ps1` richtet den gemeinsamen Ordner in einem
+  Durchgang ein: Release laden (oder lokales ZIP verwenden), SHA-256 und
+  mitgeliefertes Hash-Manifest pruefen, nach `core\` entpacken, passende
+  `config.json` schreiben, Selbsttest fahren und benennen, was noch fehlt.
+  Ein CI-Schritt fuehrt das Skript auf `windows-latest` gegen das frisch
+  gebaute Paket aus, damit die Anleitung nicht ungeprueft bleibt.
+- `docs/ERSTE_SCHRITTE.md` fuehrt linear von null bis zur ersten
+  Arbeitsliste, inklusive Fehlertabelle und einem Abschnitt zum
+  Ausprobieren ohne Excel auf Mac/Linux.
 - `packaging/windows/constraints-windows-x64.txt` pinnt die 49 Pakete des
   Auslieferungsbuilds auf exakte Versionen. `build.ps1`, der Windows-CI-Job
   und der Release-Workflow loesen dagegen auf, ein CI-Schritt laesst den
@@ -21,6 +30,14 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ### Behoben
 
+- **OCR fiel komplett aus, wenn ein konfiguriertes Zusatzmodell fehlte.**
+  Die ausgelieferte `config.json` verweist auf das Latin-Rec-Modell, das erst
+  per `provision_offline.ps1` daneben gelegt wird. Vorher warf RapidOCR beim
+  Laden, und da im Windows-Paket kein Tesseract liegt, blieb gar keine Engine
+  uebrig: Scans und Fotos lieferten kommentarlos null Zeilen. Die
+  Auswahlkette faellt jetzt wie dokumentiert auf die gebuendelten
+  Standardmodelle zurueck und weist in der Selbstauskunft darauf hin. Zwei
+  Regressionstests sichern das ab.
 - Der Changelog-Abschnitt zu 0.1.0 behauptete einleitend noch offene
   Windows-Gates, obwohl die Aufzaehlung darunter den gruenen CI-Build bereits
   festhielt. Ausserdem fehlte der Hinweis, dass das ausgelieferte Paket nur

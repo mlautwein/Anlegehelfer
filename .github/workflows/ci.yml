@@ -111,6 +111,38 @@ jobs:
           if (-not $resp.ok) { throw "analyze-Smoke fehlgeschlagen: $($resp.error.message)" }
           if ($resp.result.rows.Count -lt 10) { throw "zu wenige Zeilen im Smoke-Test" }
           Write-Host ("Smoke ok: {0} Zeilen" -f $resp.result.rows.Count)
+      - name: Einrichtungsskript auf echtem Windows testen
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          # Paket schnueren wie im Release, inklusive Hash-Manifest.
+          $distDir = (Resolve-Path "dist\lims_core").Path
+          $manifest = @{}
+          Get-ChildItem -Path $distDir -Recurse -File | ForEach-Object {
+            $rel = $_.FullName.Substring($distDir.Length + 1) -replace "\\", "/"
+            $manifest[$rel] = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash.ToLower()
+          }
+          $manifest | ConvertTo-Json -Depth 3 | Set-Content -Encoding UTF8 (Join-Path $distDir "hashes.json")
+          New-Item -ItemType Directory -Path ci-paket -Force | Out-Null
+          $zip = "ci-paket\lims_core-ci-windows-x64.zip"
+          Compress-Archive -Path "dist\lims_core\*" -DestinationPath $zip -Force
+          $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
+          "$hash  $(Split-Path $zip -Leaf)" | Set-Content -Encoding ASCII "$zip.sha256"
+
+          # Genau der Aufruf, der in docs/ERSTE_SCHRITTE.md steht.
+          $ziel = Join-Path $env:RUNNER_TEMP "LIMS-PA"
+          & powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel $ziel -Paket $zip
+          if ($LASTEXITCODE -ne 0) { throw "einrichten.ps1 ist fehlgeschlagen" }
+
+          foreach ($p in @("config.json", "core\lims_core.exe", "core\hashes.json")) {
+            if (-not (Test-Path (Join-Path $ziel $p))) { throw "nach der Einrichtung fehlt: $p" }
+          }
+          # Das Latin-Modell fehlt hier absichtlich: OCR muss trotzdem laufen
+          # (Rueckfall auf die gebuendelten Standardmodelle).
+          $h = & (Join-Path $ziel "core\lims_core.exe") --config (Join-Path $ziel "config.json") health | ConvertFrom-Json
+          if (-not $h.result.ocr.available) { throw "OCR nicht verfuegbar: $($h.result.ocr.detail)" }
+          Write-Host ("Einrichtung ok - OCR: {0}" -f $h.result.ocr.detail)
+          Remove-Item ci-paket -Recurse -Force
       - name: Artefakt hochladen
         uses: actions/upload-artifact@v7
         with:

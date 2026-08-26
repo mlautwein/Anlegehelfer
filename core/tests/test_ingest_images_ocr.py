@@ -97,3 +97,45 @@ def test_umlaute_in_ocr_ergebnis(db_con, settings, fixtures_dir):
     )
     bez2 = " | ".join(r.fields["Bez2"].value for r in res.rows)
     assert "Teeküche" in bez2
+
+
+def _rapidocr_installiert() -> bool:
+    try:
+        import rapidocr_onnxruntime  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+@pytest.mark.skipif(
+    not _rapidocr_installiert(), reason="rapidocr-onnxruntime nicht installiert"
+)
+def test_fehlendes_zusatzmodell_faellt_auf_standardmodelle_zurueck():
+    """Ein konfiguriertes, aber nicht provisioniertes Modell darf OCR nicht abschalten.
+
+    Die ausgelieferte config.json zeigt auf das Latin-Rec-Modell, das erst
+    per provision_offline.ps1 daneben gelegt wird. Vorher wirft RapidOCR
+    beim Laden. Da im Windows-Paket kein Tesseract liegt, blieb frueher gar
+    keine Engine uebrig und Scans lieferten kommentarlos null Zeilen.
+    """
+    from lims_assistant.config import OcrConfig
+    from lims_assistant.ocr.base import engine_health
+
+    cfg = OcrConfig(
+        engine="rapidocr",
+        rec_model_path="core/models/ocr/gibt-es-nicht.onnx",
+        dict_path="core/models/ocr/gibt-es-nicht.txt",
+    )
+    name, ok, detail = engine_health(cfg)
+    assert ok, f"OCR faellt komplett aus statt zurueck: {detail}"
+    assert name == "rapidocr"
+    assert "Standardmodelle" in detail
+
+
+def test_engine_none_bleibt_abgeschaltet():
+    """engine='none' ist eine bewusste Entscheidung und darf nicht umgangen werden."""
+    from lims_assistant.config import OcrConfig
+    from lims_assistant.ocr.base import engine_health
+
+    name, ok, _ = engine_health(OcrConfig(engine="none"))
+    assert (name, ok) == ("none", False)
