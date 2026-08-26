@@ -81,6 +81,8 @@ RAUMTYP: dict[str, list[str]] = {
     "Aufenthaltsraum": ["aufenthaltsraum", "aufenthalt"],
     "Bewohnerzimmer": ["bewohnerzimmer"],
     "Gästezimmer": ["gaestezimmer"],
+    "Klassenraum": ["klassenraum", "klassenzimmer"],
+    "Gruppenraum": ["gruppenraum"],
 }
 
 # Raumtypen mit ueberwiegend technischen Entnahmestellen.

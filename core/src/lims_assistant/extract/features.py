@@ -248,6 +248,16 @@ def extract_features(
             )
             _set(f, "medium", fuzzy_med or "", SRC_FUZZY)
 
+    # ---------------- Nachbereinigung: Ort steckt im Raumtyp ("Personal-WC")
+    if (
+        f.ort
+        and f.raumtyp
+        and f.ort != f.raumtyp
+        and fold_for_match(f.ort) in fold_for_match(f.raumtyp)
+    ):
+        f.ort = ""
+        f.ort_src = SRC_NONE
+
     # ---------------- Nachbereinigung: Ort vs. Raumtyp nie identisch doppelt
     if f.ort and f.raumtyp == f.ort:
         if f.raumtyp_src == SRC_STRUCTURE:

@@ -63,9 +63,14 @@ def compose_bez1(f: RowFeatures) -> Composed:
 
 
 def compose_bez2(f: RowFeatures) -> Composed:
+    from lims_assistant.textutil import fold_for_match
+
     raumtyp = f.raumtyp
     # "Zimmer 7, Zimmer" vermeiden: generischer Raumtyp traegt nichts bei.
     if raumtyp and f.raum and raumtyp.lower() in ("zimmer", "raum"):
+        raumtyp = ""
+    # "Whg 1 Bad, Bad" vermeiden: Raumtyp steckt schon in der Raumangabe.
+    if raumtyp and f.raum and fold_for_match(raumtyp) in fold_for_match(f.raum):
         raumtyp = ""
     parts = [f.etage, f.raum, raumtyp]
     srcs = [f.etage_src, f.raum_src, f.raumtyp_src]

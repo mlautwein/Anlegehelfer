@@ -338,6 +338,21 @@ def make_gold(path: Path) -> None:
             urow("Seniorenresidenz Am Kurpark, Haus 1", "UG, Technikraum", "Vorlauf, PNV", "Warmwasser, Speicher", ""),
             urow("Seniorenresidenz Am Kurpark, Haus 1", "UG, Technikraum", "Rücklauf, PNV", "Warmwasser, Zirkulation", ""),
         ],
+        "schule_scan.pdf": [
+            urow("Grundschule Lindenweg", "EG, Raum 4, Klassenraum", "Waschbecken, Einhandmischarmatur", "Kaltwasser", "Legionellen"),
+            urow("Grundschule Lindenweg", "EG, Teeküche", "Spüle, Einhandmischarmatur", "Warmwasser", "Legionellen"),
+            urow("Grundschule Lindenweg", "1. OG, Personal-WC", "Waschbecken, Zweigriffarmatur", "Warmwasser", "Legionellen"),
+            urow("Grundschule Lindenweg", "UG, Technikraum", "Vorlauf, PNV", "Warmwasser, Speicher", "Legionellen"),
+            urow("Grundschule Lindenweg", "UG, Technikraum", "Zirkulation, PNV", "Warmwasser, Zirkulation", "Legionellen"),
+        ],
+        "wohnhaus.xlsx": [
+            urow("Wohnhaus Gartenstr. 12", "EG, Whg 1 Bad", "Waschbecken, Einhandmischarmatur", "Kaltwasser", "Mikrobiologische Untersuchung"),
+            urow("Wohnhaus Gartenstr. 12", "EG, Whg 1 Bad", "Waschbecken, Einhandmischarmatur", "Warmwasser", "Mikrobiologische Untersuchung"),
+            urow("Wohnhaus Gartenstr. 12", "1. OG, Whg 3 Kueche", "Spüle, Einhandmischarmatur", "Warmwasser", ""),
+            urow("Wohnhaus Gartenstr. 12", "2. OG, Whg 5 Bad", "Dusche, Brausearmatur", "Warmwasser", "Legionellen"),
+            urow("Wohnhaus Gartenstr. 12", "KG, Waschküche", "Ausgussbecken, Standventil", "Kaltwasser", ""),
+            urow("Wohnhaus Gartenstr. 12", "KG, Heizungsraum", "Rücklauf, PNV", "Warmwasser, Speicher", "Legionellen"),
+        ],
     }
     path.write_text(
         json.dumps(gold, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

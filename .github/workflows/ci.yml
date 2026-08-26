@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Kern-Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Systemabhaengigkeiten (Tesseract deu als Dev-OCR)
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu
+          else
+            brew install tesseract tesseract-lang
+          fi
+        shell: bash
+      - name: Abhaengigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install -e ".[ocr]" || echo "OCR-Extra optional (Tests skippen sauber)"
+      - name: Fixtures erzeugen
+        run: python scripts/make_fixtures.py
+      - name: VBA-Lint
+        run: python scripts/vba_lint.py
+      - name: Tests
+        run: python -m pytest core/tests -q
+
+  build-windows:
+    name: Windows-x64-EXE (PyInstaller onedir)
+    runs-on: windows-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install -e ".[ocr]"
+          pip install pyinstaller
+      - name: Fixtures erzeugen
+        run: python scripts/make_fixtures.py
+      - name: Tests auf Windows
+        run: python -m pytest core/tests -q
+      - name: PyInstaller onedir
+        run: pyinstaller --clean --noconfirm packaging/windows/lims_core.spec
+      - name: EXE-Smoke-Test (health + analyze)
+        shell: pwsh
+        run: |
+          $exe = "dist\lims_core\lims_core.exe"
+          & $exe health
+          if ($LASTEXITCODE -ne 0) { throw "health fehlgeschlagen" }
+          # Analyse-Smoke ueber das echte Jobprotokoll
+          $job = Join-Path $env:TEMP ("job-" + [guid]::NewGuid())
+          New-Item -ItemType Directory -Path $job | Out-Null
+          $fixture = (Resolve-Path "fixtures\synthetic\klinik_digital.pdf").Path -replace "\\", "\\"
+          $req = '{"schema_version":"1.0","job_id":"ci-smoke","kind":"analyze","created_utc":"2026-01-01T00:00:00Z","payload":{"sources":[{"type":"pdf","paths":["' + $fixture + '"]}]}}'
+          Set-Content -Path (Join-Path $job "request.json") -Value $req -Encoding UTF8
+          & $exe run-job --job-dir $job
+          $resp = Get-Content (Join-Path $job "response.json") -Raw | ConvertFrom-Json
+          if (-not $resp.ok) { throw "analyze-Smoke fehlgeschlagen: $($resp.error.message)" }
+          if ($resp.result.rows.Count -lt 10) { throw "zu wenige Zeilen im Smoke-Test" }
+          Write-Host ("Smoke ok: {0} Zeilen" -f $resp.result.rows.Count)
+      - name: Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: lims_core-windows-x64
+          path: dist/lims_core/
+          retention-days: 30

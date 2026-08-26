@@ -158,5 +158,97 @@
       "Untersuchungsart": "",
       "uncertain": {}
     }
+  ],
+  "schule_scan.pdf": [
+    {
+      "Bez1": "Grundschule Lindenweg",
+      "Bez2": "EG, Raum 4, Klassenraum",
+      "B3": "Waschbecken, Einhandmischarmatur",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Grundschule Lindenweg",
+      "Bez2": "EG, Teeküche",
+      "B3": "Spüle, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Grundschule Lindenweg",
+      "Bez2": "1. OG, Personal-WC",
+      "B3": "Waschbecken, Zweigriffarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Grundschule Lindenweg",
+      "Bez2": "UG, Technikraum",
+      "B3": "Vorlauf, PNV",
+      "B4": "Warmwasser, Speicher",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Grundschule Lindenweg",
+      "Bez2": "UG, Technikraum",
+      "B3": "Zirkulation, PNV",
+      "B4": "Warmwasser, Zirkulation",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    }
+  ],
+  "wohnhaus.xlsx": [
+    {
+      "Bez1": "Wohnhaus Gartenstr. 12",
+      "Bez2": "EG, Whg 1 Bad",
+      "B3": "Waschbecken, Einhandmischarmatur",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Mikrobiologische Untersuchung",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Wohnhaus Gartenstr. 12",
+      "Bez2": "EG, Whg 1 Bad",
+      "B3": "Waschbecken, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Mikrobiologische Untersuchung",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Wohnhaus Gartenstr. 12",
+      "Bez2": "1. OG, Whg 3 Kueche",
+      "B3": "Spüle, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Wohnhaus Gartenstr. 12",
+      "Bez2": "2. OG, Whg 5 Bad",
+      "B3": "Dusche, Brausearmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Wohnhaus Gartenstr. 12",
+      "Bez2": "KG, Waschküche",
+      "B3": "Ausgussbecken, Standventil",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Wohnhaus Gartenstr. 12",
+      "Bez2": "KG, Heizungsraum",
+      "B3": "Rücklauf, PNV",
+      "B4": "Warmwasser, Speicher",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    }
   ]
 }
