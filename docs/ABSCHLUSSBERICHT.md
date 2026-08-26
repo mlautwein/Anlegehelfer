@@ -69,11 +69,15 @@ realen Genauigkeitswerte behauptet.
 
 ## 4. Status Windows-Build und Excel-2016-Abnahme
 
-- **Windows-x64-Build: vorbereitet, noch nicht ausgefuehrt.** Reproduzierbar
-  ueber `packaging/windows/build.ps1` (Tests -> PyInstaller onedir ->
-  health-Smoke -> SHA-256-Manifest) und den CI-Job `build-windows`
-  (inkl. Analyze-Smoke ueber das echte Jobprotokoll + Artefakt-Upload).
-  In der Entwicklungsumgebung stand kein Windows zur Verfuegung.
+- **Windows-x64-Build: ausgefuehrt und gruen** (Nachtrag 26.08.2026). Der
+  CI-Job `build-windows` ist auf `windows-latest` erstmals vollstaendig
+  durchgelaufen: 120 Tests, PyInstaller-onedir, `--version`- und
+  `health`-Smoke sowie ein Analyze-Smoke ueber das echte Jobprotokoll, der
+  aus `klinik_digital.pdf` **14 Zeilen** erzeugt hat - exakt die
+  Gold-Erwartung. Das Paket liegt als Artefakt `lims_core-windows-x64` vor.
+  Lokal reproduzierbar bleibt der Weg ueber `packaging/windows/build.ps1`
+  (Tests -> PyInstaller onedir -> health-Smoke -> SHA-256-Manifest); dieser
+  Skriptpfad ist weiterhin nicht auf einer echten Zielmaschine gelaufen.
 - **Excel-2016-x64-Abnahme: offen als dokumentiertes Gate.** Vollstaendige
   manuelle Checkliste mit 30 Einzelpruefungen: `docs/ABNAHME_EXCEL2016.md`.
   VBA ist statisch geprueft (Lint als Test-Gate: Option Explicit ueberall,

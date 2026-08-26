@@ -90,10 +90,13 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
 
 ### Bekannte Einschraenkungen
 
-- **Windows-x64-Build und Excel-2016-Abnahme sind offen.** Der Build ist
-  ueber `packaging/windows/build.ps1` und den CI-Job reproduzierbar, wurde
-  aber noch nicht auf einer echten Zielmaschine abgenommen; die manuelle
+- **Excel-2016-Abnahme ist offen.** Das VBA ist statisch geprueft (Lint als
+  Test-Gate), aber nie in echtem Excel ausgefuehrt worden; die manuelle
   Checkliste mit 30 Pruefungen steht in `docs/ABNAHME_EXCEL2016.md`.
+- **Der Windows-Build laeuft nur in CI.** `windows-latest` baut die
+  onedir-EXE und besteht den Analyse-Smoke ueber das echte Jobprotokoll
+  (14 Zeilen aus `klinik_digital.pdf`). Auf einer echten Zielmaschine mit
+  `packaging/windows/build.ps1` wurde er noch nicht abgenommen.
 - **Kein Produktionsmodell gepinnt.** Latin-OCR-Modell und LLM-Artefakte sind
   in `packaging/models/manifest.json` beschrieben, aber ohne Hashes; die
   Downloads waren in der Entwicklungsumgebung gesperrt
