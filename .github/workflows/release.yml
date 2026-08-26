@@ -67,6 +67,16 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Saubere Build-Umgebung
+        shell: pwsh
+        run: |
+          # Ohne eigenes venv enthaelt pip freeze auch die vorinstallierten
+          # Pakete des Runner-Images (z. B. filelock ueber virtualenv). Die
+          # steuert unser Install gar nicht, die Versionsbindung waere also
+          # dauerhaft instabil. build.ps1 arbeitet aus demselben Grund in
+          # .venv-build.
+          python -m venv .venv-build
+          "$PWD\.venv-build\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
       - name: Abhaengigkeiten (gegen Constraints aufgeloest)
         shell: bash
         run: |
