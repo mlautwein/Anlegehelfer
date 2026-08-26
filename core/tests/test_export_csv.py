@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from lims_assistant.domain.entities import EXPORT_FILENAMES
@@ -13,7 +15,8 @@ ROWS = [
 
 def test_fuenf_dateien_headerlos_zeilengleich(tmp_path):
     files, hashes = export_five(ROWS, tmp_path)
-    assert [f.split("/")[-1] for f in files] == list(EXPORT_FILENAMES)
+    # Path.name statt split("/") - auf Windows trennt der Pfad mit "\\".
+    assert [Path(f).name for f in files] == list(EXPORT_FILENAMES)
     assert set(hashes) == set(EXPORT_FILENAMES)
     for i, name in enumerate(EXPORT_FILENAMES):
         content = (tmp_path / name).read_bytes()

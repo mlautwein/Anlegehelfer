@@ -77,6 +77,10 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   `docProps/core.xml` und die ZIP-Eintraege der Excel-Container (openpyxl).
   Zwei Laeufe erzeugten dadurch unterschiedliche Bytes. Alle Zeitstempel
   liegen jetzt fest; CI prueft die Byte-Gleichheit zweier Laeufe.
+- `test_export_csv.py` zerlegte Exportpfade mit `split("/")` und schlug
+  dadurch auf Windows fehl, wo der Trenner `\` ist. Der Test benutzt jetzt
+  `Path.name`. Betroffen war nur der Test, nicht der Exportcode - gefunden
+  vom erstmals durchgelaufenen Windows-CI-Job.
 
 ### Geaendert
 
