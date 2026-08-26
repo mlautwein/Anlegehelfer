@@ -130,6 +130,12 @@ def build_parser() -> argparse.ArgumentParser:
         description=f"LIMS-Probenassistent Rechenkern {APP_VERSION} (offline)",
     )
     parser.add_argument("--config", help="Pfad zu config.json", default=None)
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"lims-core {APP_VERSION} (Jobvertrag {SCHEMA_VERSION})",
+        help="Version von Kern und Jobvertrag ausgeben",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("run-job", help="Jobdatei ausfuehren (request.json im Jobordner)")

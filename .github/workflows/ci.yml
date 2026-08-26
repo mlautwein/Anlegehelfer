@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Wird vom Release-Workflow als Qualitaetsgate wiederverwendet.
+  workflow_call:
 
 jobs:
   test:
@@ -14,8 +16,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Systemabhaengigkeiten (Tesseract deu als Dev-OCR)
@@ -33,18 +35,32 @@ jobs:
           pip install -e ".[ocr]" || echo "OCR-Extra optional (Tests skippen sauber)"
       - name: Fixtures erzeugen
         run: python scripts/make_fixtures.py
+      - name: Korpus reproduzierbar (zwei Laeufe byte-identisch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a fixtures/synthetic "$RUNNER_TEMP/fixtures-lauf-a"
+          python scripts/make_fixtures.py
+          diff -r "$RUNNER_TEMP/fixtures-lauf-a" fixtures/synthetic
       - name: VBA-Lint
         run: python scripts/vba_lint.py
       - name: Tests
         run: python -m pytest core/tests -q
+      - name: Referenzkorpus (Linux) als Artefakt
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: fixtures-linux-reference
+          path: fixtures/synthetic/
+          retention-days: 14
 
   build-windows:
     name: Windows-x64-EXE (PyInstaller onedir)
     runs-on: windows-latest
     needs: test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Abhaengigkeiten
@@ -77,7 +93,7 @@ jobs:
           if ($resp.result.rows.Count -lt 10) { throw "zu wenige Zeilen im Smoke-Test" }
           Write-Host ("Smoke ok: {0} Zeilen" -f $resp.result.rows.Count)
       - name: Artefakt hochladen
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lims_core-windows-x64
           path: dist/lims_core/

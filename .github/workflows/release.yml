@@ -1,0 +1,149 @@
+name: Release
+
+# Loest bei einem Versionstag aus (z. B. v0.1.0) und veroeffentlicht das
+# portable Windows-x64-Paket als GitHub-Release. Reihenfolge bewusst:
+# erst Versionsabgleich, dann das komplette CI-Gate, erst danach Build und
+# Veroeffentlichung - ein Release entsteht nie an den Tests vorbei.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Bereits vorhandener Versionstag, z. B. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  guard:
+    name: Versionsabgleich (Tag vs. APP_VERSION)
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      prerelease: ${{ steps.check.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          version="${tag#v}"
+          app="$(sed -n 's/^APP_VERSION = "\(.*\)"$/\1/p' core/src/lims_assistant/version.py)"
+          proj="$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)"
+          echo "Tag=$tag  APP_VERSION=$app  pyproject=$proj"
+          if [ "$version" != "$app" ] || [ "$version" != "$proj" ]; then
+            echo "::error::Tag '$tag' passt nicht zu APP_VERSION '$app' / pyproject '$proj'."
+            exit 1
+          fi
+          if ! grep -q "^## \[$version\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md hat keinen Abschnitt '## [$version]'."
+            exit 1
+          fi
+          # 0.y.z und Tags mit Suffix (z. B. -rc1) gelten als Vorabversion.
+          case "$version" in
+            0.*|*-*) pre=true ;;
+            *) pre=false ;;
+          esac
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$pre" >> "$GITHUB_OUTPUT"
+
+  ci:
+    name: Qualitaetsgate
+    needs: guard
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Windows-Paket bauen und veroeffentlichen
+    needs: [guard, ci]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Abhaengigkeiten
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install -e ".[ocr]"
+          pip install pyinstaller
+
+      - name: Fixtures erzeugen
+        run: python scripts/make_fixtures.py
+
+      - name: PyInstaller onedir
+        run: pyinstaller --clean --noconfirm packaging/windows/lims_core.spec
+
+      - name: Smoke-Test (version + health + analyze)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $exe = "dist\lims_core\lims_core.exe"
+          & $exe --version
+          if ($LASTEXITCODE -ne 0) { throw "--version fehlgeschlagen" }
+          & $exe health
+          if ($LASTEXITCODE -ne 0) { throw "health fehlgeschlagen" }
+          $job = Join-Path $env:TEMP ("job-" + [guid]::NewGuid())
+          New-Item -ItemType Directory -Path $job | Out-Null
+          $fixture = (Resolve-Path "fixtures\synthetic\klinik_digital.pdf").Path -replace "\\", "\\"
+          $req = '{"schema_version":"1.0","job_id":"release-smoke","kind":"analyze","created_utc":"2026-01-01T00:00:00Z","payload":{"sources":[{"type":"pdf","paths":["' + $fixture + '"]}]}}'
+          Set-Content -Path (Join-Path $job "request.json") -Value $req -Encoding UTF8
+          & $exe run-job --job-dir $job
+          $resp = Get-Content (Join-Path $job "response.json") -Raw | ConvertFrom-Json
+          if (-not $resp.ok) { throw "analyze-Smoke fehlgeschlagen: $($resp.error.message)" }
+          if ($resp.result.rows.Count -lt 10) { throw "zu wenige Zeilen im Smoke-Test" }
+          Write-Host ("Smoke ok: {0} Zeilen" -f $resp.result.rows.Count)
+
+      - name: Hash-Manifest im Paket
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $distDir = (Resolve-Path "dist\lims_core").Path
+          $manifest = @{}
+          Get-ChildItem -Path $distDir -Recurse -File | ForEach-Object {
+            $rel = $_.FullName.Substring($distDir.Length + 1) -replace "\\", "/"
+            $manifest[$rel] = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash.ToLower()
+          }
+          $manifest | ConvertTo-Json -Depth 3 | Set-Content -Encoding UTF8 (Join-Path $distDir "hashes.json")
+          Write-Host ("Manifest: {0} Dateien" -f $manifest.Count)
+
+      - name: Paket schnueren (ZIP + SHA-256)
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Path release -Force | Out-Null
+          $zip = "release\lims_core-$env:VERSION-windows-x64.zip"
+          Compress-Archive -Path "dist\lims_core\*" -DestinationPath $zip -CompressionLevel Optimal
+          $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
+          "$hash  $(Split-Path $zip -Leaf)" | Set-Content -Encoding ASCII "$zip.sha256"
+          Write-Host "SHA-256 $hash"
+
+      - name: Releasenotizen aus CHANGELOG erzeugen
+        shell: bash
+        env:
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: python scripts/release_notes.py "$VERSION" --out release/NOTES.md
+
+      - name: GitHub-Release anlegen
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+          PRERELEASE: ${{ needs.guard.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          flags=""
+          if [ "$PRERELEASE" = "true" ]; then flags="--prerelease"; fi
+          gh release create "$TAG" \
+            --title "LIMS-Probenassistent $TAG" \
+            --notes-file release/NOTES.md \
+            $flags \
+            release/*.zip release/*.zip.sha256
