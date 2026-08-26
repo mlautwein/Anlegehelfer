@@ -120,10 +120,17 @@ fuer Latin-OCR-Modell und Qwen3-4B, gefolgt von `scripts/benchmark_llm.py`.
 ## 7. Git-Status
 
 - Lokales Repository, Branch `main`, Arbeitsbaum sauber.
-- GitHub: **`mlautwein/Anlegehelfer`, Sichtbarkeit `private`** (Stand
-  26.08.2026 gepusht). Die `.gitignore` haelt reale Daten, Modelle und
-  Geheimnisse fern; ein Scan der 158 versionierten Dateien vor dem Push hat
-  keine Schluessel oder Zugangsdaten gefunden.
+- GitHub: **`mlautwein/Anlegehelfer`, Sichtbarkeit `public`** (Stand
+  26.08.2026 gepusht). Damit weicht das Projekt bewusst von der urspruenglich
+  vorgesehenen rein internen Ablage ab: Der Quelltext ist einsehbar
+  ("source available"), die Rechte bleiben laut `LICENSE` vollstaendig
+  vorbehalten, und Schreibzugriff hat weiterhin nur der Rechteinhaber.
+  Ausschlaggebend war, dass GitHub Actions fuer oeffentliche Repositories
+  kostenfrei laeuft. Vor der Umstellung wurde die **vollstaendige Historie**
+  (284 Objekte, 8 Commits) auf Schluessel, Zugangsdaten und geloeschte
+  Dateien geprueft - ohne Befund; die `.gitignore` haelt reale Daten,
+  Lerndaten und Modelle fern. Oeffentlich sichtbar wird auch die
+  Autor-E-Mail in den Commit-Metadaten.
 - Versionierung/Release: `CHANGELOG.md` nach Keep-a-Changelog,
   Release ueber Versionstag `v<version>`. Der Workflow
   `.github/workflows/release.yml` gleicht Tag, `APP_VERSION`,

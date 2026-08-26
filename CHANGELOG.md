@@ -78,6 +78,12 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   Zwei Laeufe erzeugten dadurch unterschiedliche Bytes. Alle Zeitstempel
   liegen jetzt fest; CI prueft die Byte-Gleichheit zweier Laeufe.
 
+### Geaendert
+
+- `LICENSE` praezisiert, dass der oeffentlich einsehbare Quelltext
+  ausdruecklich keine Rechteeinraeumung darstellt ("source available", alle
+  Rechte vorbehalten).
+
 ### Bekannte Einschraenkungen
 
 - **Windows-x64-Build und Excel-2016-Abnahme sind offen.** Der Build ist

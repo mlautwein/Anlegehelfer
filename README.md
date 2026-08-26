@@ -6,9 +6,11 @@
 offene Gates) · Jobvertrag `1.0` · [Changelog](CHANGELOG.md) ·
 [Releases](https://github.com/mlautwein/Anlegehelfer/releases)
 
-> Privates Repository. Die Software ist proprietaer und ausschliesslich fuer
-> die interne Nutzung bestimmt (siehe [LICENSE](LICENSE)); reale Dokumente,
-> Modelle und Geheimnisse gehoeren nicht hinein.
+> **Source available, nicht Open Source.** Der Quelltext ist oeffentlich
+> einsehbar, alle Rechte bleiben vorbehalten - Nutzung, Bearbeitung und
+> Weitergabe nur mit schriftlicher Zustimmung (siehe [LICENSE](LICENSE)).
+> Schreibzugriff hat ausschliesslich der Rechteinhaber. Reale Dokumente,
+> Lerndaten, Modelle und Geheimnisse gehoeren nicht in dieses Repository.
 
 Lokaler, vollstaendig offline arbeitender Assistent zur Aufbereitung von
 Trinkwasser-Arbeitslisten. Das Werkzeug liest PDF-Dokumente (mit Textschicht

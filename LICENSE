@@ -1,9 +1,22 @@
 LIMS-Probenassistent
 Copyright (c) 2026 Marius Lautwein
 
-Proprietaere Software fuer die interne Nutzung. Alle Rechte vorbehalten.
-Keine Weitergabe, Veroeffentlichung oder Nutzung ausserhalb des
-vorgesehenen internen Einsatzes ohne ausdrueckliche Zustimmung.
+Alle Rechte vorbehalten.
+
+Der Quelltext ist oeffentlich einsehbar ("source available"). Diese
+Sichtbarkeit ist ausdruecklich KEINE Rechteeinraeumung: Es wird keine
+Open-Source-Lizenz gewaehrt. Ohne vorherige schriftliche Zustimmung des
+Rechteinhabers sind insbesondere nicht gestattet: Nutzung, Vervielfaeltigung,
+Bearbeitung, Verbreitung, oeffentliche Zugaenglichmachung sowie kommerzielle
+Verwertung - ganz oder in Teilen.
+
+Erlaubt bleibt, was das Urheberrecht zwingend gestattet (z. B. das Lesen des
+Quelltextes sowie die technisch bedingte Vervielfaeltigung beim Betrachten
+auf GitHub).
+
+Die Software wird ohne jede Gewaehr bereitgestellt. Eine Haftung fuer
+Schaeden aus ihrer Nutzung ist im gesetzlich zulaessigen Rahmen
+ausgeschlossen.
 
 Drittanbieterkomponenten unterliegen ihren eigenen Lizenzen -
 siehe docs/LIZENZEN.md und packaging/models/manifest.json.
