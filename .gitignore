@@ -31,3 +31,6 @@ Thumbs.db
 
 # Benchmark-Rohdaten mit Zeitstempeln bleiben lokal; kuratierte Berichte liegen in docs/benchmarks
 docs/benchmarks/raw/
+
+# Von CI erzeugter pip-freeze-Auszug (die gepflegte Datei liegt unter packaging/windows/)
+/constraints-windows-x64.txt

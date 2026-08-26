@@ -10,6 +10,24 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ## [Unveroeffentlicht]
 
+### Hinzugefuegt
+
+- `packaging/windows/constraints-windows-x64.txt` pinnt die 49 Pakete des
+  Auslieferungsbuilds auf exakte Versionen. `build.ps1`, der Windows-CI-Job
+  und der Release-Workflow loesen dagegen auf, ein CI-Schritt laesst den
+  Build fehlschlagen, sobald die installierten Versionen abweichen.
+  `pyproject.toml` behaelt bewusst Bereiche, damit die Testmatrix
+  Regressionen in neuen Bibliotheksversionen weiterhin findet.
+
+### Behoben
+
+- Der Changelog-Abschnitt zu 0.1.0 behauptete einleitend noch offene
+  Windows-Gates, obwohl die Aufzaehlung darunter den gruenen CI-Build bereits
+  festhielt. Ausserdem fehlte der Hinweis, dass das ausgelieferte Paket nur
+  die RapidOCR-Standardmodelle enthaelt (siehe dort). `docs/LIZENZEN.md` und
+  `docs/WINDOWS_BUILD.md` gingen weiterhin von einem privaten, noch nicht
+  gepushten Repository aus.
+
 ## [0.1.0] - 2026-08-26
 
 Erste Vorabversion (MVP). Der Rechenkern ist end-to-end funktionsfaehig und

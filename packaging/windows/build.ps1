@@ -18,10 +18,12 @@ $py = Join-Path $repo ".venv-build\Scripts\python.exe"
 & $py -m pip install --upgrade pip | Out-Null
 
 Write-Host "== 2/5 Abhaengigkeiten (inkl. OCR) installieren" -ForegroundColor Cyan
-& $py -m pip install -e ".[ocr]" pyinstaller
+# Gegen exakte Versionen aufloesen, damit zwei Builds dieselbe EXE ergeben.
+$constraints = Join-Path $repo "packaging\windows\constraints-windows-x64.txt"
+& $py -m pip install -c $constraints -e ".[ocr]" pyinstaller
 
 Write-Host "== 3/5 Tests (Kern) auf dem Build-Rechner" -ForegroundColor Cyan
-& $py -m pip install -e ".[dev]"
+& $py -m pip install -c $constraints -e ".[dev]"
 & $py -m pytest core/tests -q
 if ($LASTEXITCODE -ne 0) { throw "Tests fehlgeschlagen - Build abgebrochen." }
 

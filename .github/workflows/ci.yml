@@ -63,18 +63,23 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Abhaengigkeiten
+      - name: Abhaengigkeiten (gegen Constraints aufgeloest)
+        shell: bash
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-          pip install -e ".[ocr]"
-          pip install pyinstaller
-      - name: Aufgeloeste Versionen festhalten (Build-Reproduzierbarkeit)
+          pip install -c packaging/windows/constraints-windows-x64.txt -e ".[dev]"
+          pip install -c packaging/windows/constraints-windows-x64.txt -e ".[ocr]"
+          pip install -c packaging/windows/constraints-windows-x64.txt pyinstaller
+      - name: Versionsbindung pruefen (Drift gegen Constraints)
         shell: bash
         run: |
           set -euo pipefail
           python -m pip freeze --exclude-editable > constraints-windows-x64.txt
-          echo "$(wc -l < constraints-windows-x64.txt) Pakete festgehalten"
+          if ! diff <(grep -vE '^#|^$' packaging/windows/constraints-windows-x64.txt | sort -f) <(sort -f constraints-windows-x64.txt); then
+            echo "::error::Installierte Versionen weichen von packaging/windows/constraints-windows-x64.txt ab. Artefakt constraints-windows-x64 herunterladen und die Datei aktualisieren."
+            exit 1
+          fi
+          echo "Versionsbindung ok ($(wc -l < constraints-windows-x64.txt) Pakete)"
       - name: Versionsliste als Artefakt
         uses: actions/upload-artifact@v7
         with:

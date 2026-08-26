@@ -85,6 +85,15 @@ komplette CI-Gate und baut erst danach das Paket.
    `pyproject.toml` gleichziehen.
 3. `git tag -a v<version> -m "..." && git push origin v<version>`.
 
+Der Auslieferungsbuild loest gegen
+`packaging/windows/constraints-windows-x64.txt` auf (exakte Versionen aller
+49 Pakete), damit zwei Builds zeitversetzt dieselbe EXE ergeben. Die
+Testmatrix nutzt bewusst die Bereiche aus `pyproject.toml`, um Regressionen
+in neuen Bibliotheksversionen zu finden. Weichen die installierten Versionen
+von der Datei ab, schlaegt der CI-Schritt "Versionsbindung pruefen" fehl -
+dann das Artefakt `constraints-windows-x64` herunterladen und die Datei
+aktualisieren.
+
 Ergebnis des Workflows: GitHub-Release mit
 `lims_core-<version>-windows-x64.zip` (portable onedir-EXE inklusive
 `hashes.json`) und zugehoeriger `.sha256`-Pruefsumme. Versionen `0.y.z` und
