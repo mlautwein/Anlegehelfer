@@ -2,16 +2,21 @@
 """Erzeugt den synthetischen deutschen Referenzkorpus (fixtures/synthetic/).
 
 Vollstaendig synthetisch - keine realen Objekte, Adressen oder Personen.
-Deterministisch (fester Seed, feste PDF-Metadaten), damit CI-Ergebnisse
-reproduzierbar sind. Aufruf:  python scripts/make_fixtures.py
+Deterministisch: fester Seed und feste Zeitstempel in PDF-, XLSX- und
+XLSM-Metadaten - zwei Laeufe auf demselben System liefern byte-identische
+Dateien. Einzige Abweichung zwischen Systemen ist die Schrift der
+Scan-Bilder (siehe FONT_CANDIDATES). Aufruf:  python scripts/make_fixtures.py
 """
 
 from __future__ import annotations
 
+import datetime as _dt
 import io
 import json
 import random
+import re
 import sys
+import time
 import zipfile
 from pathlib import Path
 
@@ -22,6 +27,43 @@ sys.path.insert(0, str(REPO / "core" / "src"))
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 random.seed(20260826)
+
+# Fester Zeitpunkt fuer alle eingebetteten Metadaten. Ohne ihn schreiben
+# reportlab, Pillow und openpyxl die aktuelle Uhrzeit in die Dateien, und
+# zwei Laeufe erzeugen unterschiedliche Bytes - der Korpus waere entgegen
+# der Zusage oben nicht reproduzierbar.
+FIXED_UTC = _dt.datetime(2026, 8, 26, 0, 0, 0, tzinfo=_dt.timezone.utc)
+FIXED_STRUCT_TIME = time.gmtime(FIXED_UTC.timestamp())
+FIXED_ZIP_TIME = (2026, 8, 26, 0, 0, 0)
+
+
+def _normalize_office_zip(path: Path) -> None:
+    """Macht einen OOXML-Container (XLSX/XLSM) bytegleich reproduzierbar.
+
+    openpyxl schreibt die aktuelle Uhrzeit gleich zweifach hinein: in die
+    Zeitstempel der ZIP-Eintraege und - beim Speichern, also nach jedem
+    Setzen von `wb.properties` - in `dcterms:modified`. Beides wird hier
+    nachtraeglich auf FIXED_UTC gezogen.
+    """
+    with zipfile.ZipFile(path) as zin:
+        entries = [
+            (i.filename, i.compress_type, i.external_attr, zin.read(i.filename))
+            for i in zin.infolist()
+        ]
+    stamp = FIXED_UTC.strftime("%Y-%m-%dT%H:%M:%SZ").encode("ascii")
+    with zipfile.ZipFile(path, "w") as zout:
+        for name, compress_type, external_attr, data in entries:
+            if name == "docProps/core.xml":
+                data = re.sub(
+                    rb"(<dcterms:(?:created|modified)\b[^>]*>)[^<]*(</dcterms:)",
+                    rb"\g<1>" + stamp + rb"\g<2>",
+                    data,
+                )
+            info = zipfile.ZipInfo(name, date_time=FIXED_ZIP_TIME)
+            info.compress_type = compress_type
+            info.external_attr = external_attr
+            zout.writestr(info, data)
+
 
 # ---------------------------------------------------------------------------
 # Fachliche Musterdaten (Klinik mit zwei Haeusern + Wohnhaus)
@@ -75,7 +117,7 @@ def make_digital_pdf(path: Path) -> None:
     from reportlab.lib.units import mm
     from reportlab.pdfgen import canvas
 
-    c = canvas.Canvas(str(path), pagesize=A4)
+    c = canvas.Canvas(str(path), pagesize=A4, invariant=1)
     c.setAuthor("synthetisch")
     c.setTitle("Arbeitsliste Legionellenpruefung")
     width, height = A4
@@ -131,7 +173,7 @@ def make_freitext_pdf(path: Path) -> None:
     from reportlab.lib.units import mm
     from reportlab.pdfgen import canvas
 
-    c = canvas.Canvas(str(path), pagesize=A4)
+    c = canvas.Canvas(str(path), pagesize=A4, invariant=1)
     c.setTitle("Probenplan Seniorenresidenz")
     width, height = A4
     c.setFont("Helvetica-Bold", 12)
@@ -158,16 +200,62 @@ def make_freitext_pdf(path: Path) -> None:
 # 3) Scan-Fixtures: gerenderte Bilder (PNG/JPG/HEIC) + Bild-PDF
 # ---------------------------------------------------------------------------
 
+# Reihenfolge bewusst: DejaVu zuerst, damit der auf Linux erzeugte
+# Referenzkorpus (und die dokumentierten Benchmarkzahlen) unveraendert
+# bleiben; danach plattformuebliche Systemschriften fuer macOS/Windows.
+FONT_CANDIDATES = (
+    # Linux
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    # macOS
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/System/Library/Fonts/Supplemental/Verdana.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    # Windows
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/segoeui.ttf",
+    # Ueber den Schriftnamen (findet die Datei ueber die Systempfade)
+    "DejaVuSans.ttf",
+    "Arial.ttf",
+)
+
+_FONT_SOURCE: str | None = None
+
+
 def _load_font(size: int):
-    for cand in (
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-    ):
+    """Skalierbare Schrift fuer die Scan-Fixtures.
+
+    Wichtig: Es darf NIE stillschweigend auf den nicht skalierbaren
+    Bitmap-Default zurueckgefallen werden - der rendert winzigen Text auf
+    grossem Blatt, wodurch die OCR-Fixtures unlesbar werden (genau das hat
+    den macOS-CI-Lauf rot gemacht, weil hier nur Linux-Pfade standen).
+    """
+    global _FONT_SOURCE
+    for cand in FONT_CANDIDATES:
         try:
-            return ImageFont.truetype(cand, size)
+            font = ImageFont.truetype(cand, size)
         except OSError:
             continue
-    return ImageFont.load_default()
+        if _FONT_SOURCE is None:
+            _FONT_SOURCE = cand
+            print(f"Scan-Fixtures: Schrift {cand}")
+        return font
+    try:
+        # Pillow >= 10.1 liefert hier eine skalierbare Standardschrift.
+        font = ImageFont.load_default(size=size)
+    except TypeError as exc:  # pragma: no cover - nur bei Pillow < 10.1
+        raise RuntimeError(
+            "Keine skalierbare Schrift gefunden und Pillow ist zu alt fuer "
+            "ImageFont.load_default(size=...). Bitte Pillow >= 10.3 "
+            "installieren oder DejaVuSans.ttf bereitstellen."
+        ) from exc
+    if not hasattr(font, "size"):  # pragma: no cover - Bitmap-Default
+        raise RuntimeError(
+            "Nur der nicht skalierbare Bitmap-Default steht zur Verfuegung; "
+            "die Scan-Fixtures waeren unlesbar. Bitte eine TrueType-Schrift "
+            "installieren (z. B. DejaVuSans.ttf)."
+        )
+    return font
 
 
 SCAN_LINES = [
@@ -212,7 +300,13 @@ def make_scan_image(path: Path, *, noise: bool, quality_jpg: int | None = None) 
 def make_scan_pdf(path: Path, image: Image.Image) -> None:
     """Bild-PDF (nur Scan, keine Textschicht)."""
     rgb = image.convert("RGB")
-    rgb.save(str(path), format="PDF", resolution=150.0)
+    rgb.save(
+        str(path),
+        format="PDF",
+        resolution=150.0,
+        creationDate=FIXED_STRUCT_TIME,
+        modDate=FIXED_STRUCT_TIME,
+    )
 
 
 def make_heic(path: Path, image: Image.Image) -> bool:
@@ -257,7 +351,10 @@ def make_xlsx(path: Path) -> None:
     ws3.append(["Etage", "Raum", "Nutzung", "Probenahmestelle", "Medium", "Untersuchung"])
     ws3.append(["EG", "Gruppenraum 2", "", "Waschbecken, EHM", "KW", "Mibi"])
     ws3.append(["EG", "Kueche", "Kueche", "Spuele, EHM", "WW", "Legionellen"])
+    # docProps/core.xml traegt sonst die aktuelle Uhrzeit.
+    wb.properties.created = FIXED_UTC.replace(tzinfo=None)
     wb.save(str(path))
+    _normalize_office_zip(path)
 
 
 def make_xls(path: Path) -> None:
@@ -299,6 +396,7 @@ def make_xlsm(path: Path, xlsx_source: Path) -> None:
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zout:
         for name, data in items.items():
             zout.writestr(name, data)
+    _normalize_office_zip(path)
 
 
 # ---------------------------------------------------------------------------
