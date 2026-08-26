@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml/badge.svg)](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml)
 
-**Version 0.3.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
+**Version 0.4.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
 offen) · Jobvertrag `1.0` · [Erste Schritte](docs/ERSTE_SCHRITTE.md) ·
 [Changelog](CHANGELOG.md) ·
 [Releases](https://github.com/mlautwein/Anlegehelfer/releases)
@@ -62,14 +62,16 @@ erzeugen.
 
 ## Loslegen
 
-Fuer den Einsatz auf einem Windows-Rechner mit Excel fuehrt
-`docs/ERSTE_SCHRITTE.md` von null bis zur ersten Arbeitsliste. Kurzform:
+Auf einem Windows-Rechner mit Excel sind es zwei Klicks:
 
-    powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel "C:\LIMS-PA"
+1. `lims-probenassistent-<version>-einrichtung.zip` von der
+   [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases) laden
+   und entpacken.
+2. `Installieren.cmd` doppelklicken.
 
-Das Skript laedt das aktuelle Release, prueft Pruefsumme und Hash-Manifest,
-schreibt `config.json` und faehrt einen Selbsttest. Danach fehlt nur noch
-die Excel-Mappe (Schritt 2 dort, braucht Excel selbst).
+Das erledigt alles: Rechenkern laden und pruefen, `config.json` schreiben,
+die Arbeitsmappe mit Excel erzeugen, Desktop-Verknuepfung anlegen,
+Selbsttest fahren. Ausfuehrlich: `docs/ERSTE_SCHRITTE.md`.
 
 ## Windows-Bereitstellung im Detail
 

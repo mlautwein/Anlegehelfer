@@ -10,6 +10,33 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ## [Unveroeffentlicht]
 
+## [0.4.0] - 2026-08-26
+
+Installation auf zwei Klicks verkuerzt: Archiv entpacken,
+`Installieren.cmd` doppelklicken. Kommandozeile ist nicht mehr noetig.
+
+### Hinzugefuegt
+
+- `Installieren.cmd` im Einrichtungsarchiv - doppelklickbar, weil Windows
+  `.ps1`-Dateien per Doppelklick im Editor oeffnet statt auszufuehren.
+  Ruft `einrichten.ps1 -Interaktiv` auf und haelt das Fenster offen.
+- `einrichten.ps1` erledigt jetzt den ganzen Weg: Es schlaegt einen
+  Arbeitsordner vor (`C:\LIMS-Probenassistent`, per Eingabetaste zu
+  uebernehmen), **erzeugt die Excel-Arbeitsmappe automatisch** und legt eine
+  Verknuepfung auf dem Desktop an. Fehlt Excel oder blockiert das Trust
+  Center die Automation, laeuft der Rest trotzdem durch und die Mappe
+  erscheint als benannter offener Punkt statt als Abbruch.
+- Neue Schalter: `-Interaktiv` (Nachfragen statt Abbrechen), `-OhneMappe`.
+  `-Ziel` ist optional geworden.
+
+### Behoben
+
+- `build_workbook.ps1` suchte die VBA-Quellen fest ueber
+  `$PSScriptRoot\..\..` und haette im entpackten Einrichtungsarchiv, wo
+  `excel\vba-src` direkt daneben liegt, gar nicht funktioniert. Es probiert
+  jetzt beide Layouts und nimmt `-VbaDir` sowie `-Ziel` entgegen, damit die
+  Mappe direkt im Arbeitsordner entsteht statt in `dist\`.
+
 ## [0.3.0] - 2026-08-26
 
 Behebt zwei Dinge, die beim ersten Auspacken sofort aufgefallen sind: Die
@@ -190,7 +217,8 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   sind dagegen unempfindlich; die dokumentierten Benchmarkzahlen beziehen
   sich auf den unter Linux erzeugten Korpus.
 
-[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.3.0...HEAD
+[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.1.0

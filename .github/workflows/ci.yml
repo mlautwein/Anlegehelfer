@@ -141,6 +141,8 @@ jobs:
 
           # Genau der Aufruf, der in docs/ERSTE_SCHRITTE.md steht.
           $ziel = Join-Path $env:RUNNER_TEMP "LIMS-PA"
+          # Ohne Excel auf dem Runner: der Mappenschritt muss sauber
+          # uebersprungen werden, statt die Einrichtung scheitern zu lassen.
           & powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel $ziel -Paket $zip
           if ($LASTEXITCODE -ne 0) { throw "einrichten.ps1 ist fehlgeschlagen" }
 

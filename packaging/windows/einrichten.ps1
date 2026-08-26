@@ -1,23 +1,24 @@
 # =====================================================================
-# einrichten.ps1 - richtet den gemeinsamen Ordner fuer den taeglichen
-# Betrieb ein: Paket entpacken, Hashes pruefen, config.json schreiben,
-# Selbsttest fahren. Nimmt alles ab ausser der Excel-Mappe (die braucht
-# Excel selbst - siehe Hinweis am Ende der Ausgabe).
+# einrichten.ps1 - richtet den Arbeitsordner in einem Durchgang ein:
+# Paket holen und pruefen, entpacken, config.json schreiben, Arbeitsmappe
+# bauen, Verknuepfung anlegen, Selbsttest fahren.
 #
-# Voraussetzungen: Windows 11 x64. Python wird NICHT gebraucht.
+# Einfachster Weg: Installieren.cmd doppelklicken. Dann sind keine
+# Kommandozeilenkenntnisse noetig.
 #
-# Aufruf (neueste Vorabversion aus GitHub laden):
+# Voraussetzungen: Windows 11 x64. Python wird NICHT gebraucht. Excel nur
+# fuer die Arbeitsmappe - fehlt es, laeuft alles andere trotzdem durch.
+#
+# Aufrufbeispiele:
+#   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Interaktiv
 #   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA"
-#
-# Aufruf mit bereits heruntergeladenem ZIP (z. B. ohne Internet am Zielrechner):
-#   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.1.0-windows-x64.zip"
+#   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.3.0-windows-x64.zip"
 # =====================================================================
 
 [CmdletBinding()]
 param(
-    # Gemeinsamer Ordner, in dem gearbeitet wird (wird angelegt, falls noetig).
-    [Parameter(Mandatory = $true)]
-    [string]$Ziel,
+    # Arbeitsordner. Ohne Angabe der Standard bzw. die Nachfrage.
+    [string]$Ziel = "",
 
     # Bereits vorliegendes Release-ZIP. Ohne Angabe wird heruntergeladen.
     [string]$Paket = "",
@@ -25,19 +26,44 @@ param(
     # Releasetag, falls nicht die neueste Version gewuenscht ist.
     [string]$Version = "",
 
+    # Nachfragen statt Abbrechen (setzt Installieren.cmd).
+    [switch]$Interaktiv,
+
     # Vorhandenes core\ und config.json ueberschreiben.
-    [switch]$Ueberschreiben
+    [switch]$Ueberschreiben,
+
+    # Arbeitsmappe nicht bauen (z. B. auf Rechnern ohne Excel).
+    [switch]$OhneMappe
 )
 
 $ErrorActionPreference = "Stop"
 $repoSlug = "mlautwein/Anlegehelfer"
+$standardZiel = "C:\LIMS-Probenassistent"
 
 function Schritt([string]$Text) { Write-Host "== $Text" -ForegroundColor Cyan }
 function Gut([string]$Text) { Write-Host "   $Text" -ForegroundColor Green }
 function Warnung([string]$Text) { Write-Host "   $Text" -ForegroundColor Yellow }
 
+$offenePunkte = New-Object System.Collections.Generic.List[string]
+
+if ($Interaktiv) {
+    Write-Host ""
+    Write-Host "  LIMS-Probenassistent einrichten" -ForegroundColor White
+    Write-Host "  -------------------------------"
+    Write-Host "  Es wird nichts ausserhalb des gewaehlten Ordners veraendert."
+    Write-Host ""
+}
+
 # ---------------------------------------------------------------------
-Schritt "1/6 Zielordner"
+Schritt "1/7 Arbeitsordner"
+if (-not $Ziel) {
+    if ($Interaktiv) {
+        $eingabe = Read-Host "Ordner [$standardZiel]"
+        $Ziel = if ($eingabe.Trim()) { $eingabe.Trim() } else { $standardZiel }
+    } else {
+        $Ziel = $standardZiel
+    }
+}
 $Ziel = [System.IO.Path]::GetFullPath($Ziel)
 if (-not (Test-Path $Ziel)) {
     New-Item -ItemType Directory -Path $Ziel -Force | Out-Null
@@ -45,13 +71,23 @@ if (-not (Test-Path $Ziel)) {
 } else {
     Gut "vorhanden: $Ziel"
 }
+
 $coreDir = Join-Path $Ziel "core"
 if ((Test-Path $coreDir) -and -not $Ueberschreiben) {
-    throw "core\ existiert bereits in '$Ziel'. Mit -Ueberschreiben erneut einrichten."
+    if ($Interaktiv) {
+        $antwort = Read-Host "In diesem Ordner ist bereits eine Einrichtung. Ueberschreiben? [j/N]"
+        if ($antwort -notmatch '^[jJyY]') {
+            Write-Host "Abgebrochen - es wurde nichts veraendert."
+            exit 0
+        }
+        $Ueberschreiben = $true
+    } else {
+        throw "core\ existiert bereits in '$Ziel'. Mit -Ueberschreiben erneut einrichten."
+    }
 }
 
 # ---------------------------------------------------------------------
-Schritt "2/6 Paket bereitstellen"
+Schritt "2/7 Paket bereitstellen"
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("lims-setup-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 try {
@@ -61,7 +97,6 @@ try {
         Gut "lokales Paket: $zip"
         $pruefsummenDatei = "$zip.sha256"
     } else {
-        # Ohne gh-CLI auskommen: Release-Metadaten ueber die oeffentliche API.
         $api = if ($Version) {
             "https://api.github.com/repos/$repoSlug/releases/tags/$Version"
         } else {
@@ -74,7 +109,7 @@ try {
         Gut "Release: $($meta.tag_name)"
 
         $asset = $meta.assets | Where-Object { $_.name -like "lims_core-*-windows-x64.zip" } | Select-Object -First 1
-        $assetHash = $meta.assets | Where-Object { $_.name -like "*.zip.sha256" } | Select-Object -First 1
+        $assetHash = $meta.assets | Where-Object { $_.name -like "lims_core-*.zip.sha256" } | Select-Object -First 1
         if (-not $asset) { throw "Im Release $($meta.tag_name) liegt kein Windows-Paket." }
 
         $zip = Join-Path $tempDir $asset.name
@@ -88,27 +123,26 @@ try {
     }
 
     # -----------------------------------------------------------------
-    Schritt "3/6 Pruefsumme"
+    Schritt "3/7 Pruefsumme"
     if ($pruefsummenDatei -and (Test-Path $pruefsummenDatei)) {
         $soll = ((Get-Content $pruefsummenDatei -Raw).Trim() -split '\s+')[0].ToLower()
         $ist = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
         if ($soll -ne $ist) {
             throw "SHA-256 stimmt nicht. Erwartet $soll, berechnet $ist. Paket NICHT verwenden."
         }
-        Gut "SHA-256 geprueft: $ist"
+        Gut "SHA-256 geprueft"
     } else {
         Warnung "Keine .sha256-Datei vorhanden - Pruefsumme uebersprungen."
     }
 
     # -----------------------------------------------------------------
-    Schritt "4/6 Entpacken"
+    Schritt "4/7 Entpacken"
     if (Test-Path $coreDir) { Remove-Item $coreDir -Recurse -Force }
     Expand-Archive -Path $zip -DestinationPath $coreDir -Force
     $exe = Join-Path $coreDir "lims_core.exe"
     if (-not (Test-Path $exe)) { throw "lims_core.exe fehlt im Paket - Paket beschaedigt?" }
     Gut "entpackt nach: $coreDir"
 
-    # Mitgeliefertes Hash-Manifest gegenpruefen (erkennt Uebertragungsfehler).
     $manifestPfad = Join-Path $coreDir "hashes.json"
     if (Test-Path $manifestPfad) {
         $manifest = Get-Content $manifestPfad -Raw | ConvertFrom-Json
@@ -129,38 +163,38 @@ try {
 }
 
 # ---------------------------------------------------------------------
-Schritt "5/6 config.json"
+Schritt "5/7 config.json"
 $configPfad = Join-Path $Ziel "config.json"
 if ((Test-Path $configPfad) -and -not $Ueberschreiben) {
-    Gut "vorhanden, bleibt unveraendert: $configPfad"
+    Gut "vorhanden, bleibt unveraendert"
 } else {
     $config = [ordered]@{
-        '$comment'              = "Erzeugt von einrichten.ps1. ocr.rec_model_path zeigt auf das Latin-Modell; solange es fehlt, arbeitet die OCR mit den gebuendelten Standardmodellen (deutsche Umlaute werden dann per Fuzzy repariert und gelb markiert). Nachruesten: provision_offline.ps1 -Step model"
-        share_dir               = $Ziel
-        core_exe                = "core/lims_core.exe"
-        job_root                = ""
-        certainty_threshold     = 0.75
+        '$comment'               = "Erzeugt von einrichten.ps1. ocr.rec_model_path zeigt auf das Latin-Modell; solange es fehlt, arbeitet die OCR mit den gebuendelten Standardmodellen (deutsche Umlaute werden dann per Fuzzy repariert und gelb markiert). Nachruesten: provision_offline.ps1 -Step model"
+        share_dir                = $Ziel
+        core_exe                 = "core/lims_core.exe"
+        job_root                 = ""
+        certainty_threshold      = 0.75
         retrieval_min_similarity = 0.42
-        retrieval_top_k         = 5
-        offline_strict          = $true
-        export_encoding         = "utf8_bom"
-        stale_lock_minutes      = 12
-        ocr                     = [ordered]@{
+        retrieval_top_k          = 5
+        offline_strict           = $true
+        export_encoding          = "utf8_bom"
+        stale_lock_minutes       = 12
+        ocr                      = [ordered]@{
             engine         = "auto"
             rec_model_path = "core/models/ocr/latin_PP-OCRv3_rec_infer.onnx"
             dict_path      = "core/models/ocr/latin_dict.txt"
             render_dpi     = 170
             min_confidence = 0.55
         }
-        llm                     = [ordered]@{
-            enabled          = $false
-            model_path       = ""
-            model_sha256     = ""
-            server_binary    = ""
-            port             = 18081
-            ctx_size         = 4096
-            threads          = 0
-            timeout_s        = 120
+        llm                      = [ordered]@{
+            enabled           = $false
+            model_path        = ""
+            model_sha256      = ""
+            server_binary     = ""
+            port              = 18081
+            ctx_size          = 4096
+            threads           = 0
+            timeout_s         = 120
             max_rows_per_call = 12
         }
     }
@@ -169,9 +203,76 @@ if ((Test-Path $configPfad) -and -not $Ueberschreiben) {
 }
 
 # ---------------------------------------------------------------------
-Schritt "6/6 Selbsttest"
+Schritt "6/7 Arbeitsmappe"
+$mappe = Join-Path $Ziel "LIMS-Probenassistent.xlsm"
+$bauSkript = Join-Path $PSScriptRoot "build_workbook.ps1"
+
+if ($OhneMappe) {
+    Warnung "uebersprungen (-OhneMappe)"
+    $offenePunkte.Add("Arbeitsmappe erzeugen: build_workbook.ps1 oder docs\EXCEL_SETUP.md")
+} elseif ((Test-Path $mappe) -and -not $Ueberschreiben) {
+    Gut "vorhanden, bleibt unveraendert"
+} elseif (-not (Test-Path $bauSkript)) {
+    Warnung "build_workbook.ps1 liegt nicht neben diesem Skript - uebersprungen."
+    $offenePunkte.Add("Arbeitsmappe erzeugen: siehe docs\EXCEL_SETUP.md")
+} else {
+    # Erst pruefen, ob Excel ueberhaupt da ist - sonst waere die
+    # Fehlermeldung der COM-Automation fuer Anwender unverstaendlich.
+    $excelDa = $false
+    try {
+        $probe = New-Object -ComObject Excel.Application
+        $probe.Quit()
+        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($probe) | Out-Null
+        $excelDa = $true
+    } catch {
+        $excelDa = $false
+    }
+
+    if (-not $excelDa) {
+        Warnung "Excel ist auf diesem Rechner nicht verfuegbar."
+        Warnung "Die Mappe muss auf einem Rechner mit Excel erzeugt werden."
+        $offenePunkte.Add("Arbeitsmappe auf einem Rechner mit Excel erzeugen (docs\ERSTE_SCHRITTE.md, Schritt 2)")
+    } else {
+        Gut "Excel gefunden, erzeuge Arbeitsmappe ..."
+        try {
+            # $LASTEXITCODE gilt nur fuer native Programme; ein Skriptaufruf
+            # meldet Fehler ueber Ausnahmen ($ErrorActionPreference = Stop).
+            & $bauSkript -Ziel $mappe
+            if (-not (Test-Path $mappe)) { throw "Die Mappe wurde nicht erzeugt." }
+            Gut "erzeugt: $mappe"
+        } catch {
+            Warnung "Die Mappe konnte nicht automatisch erzeugt werden:"
+            Warnung "  $($_.Exception.Message)"
+            Warnung "Meist fehlt in Excel der Haken 'Zugriff auf das VBA-Projekt-"
+            Warnung "objektmodell vertrauen' (Datei > Optionen > Trust Center >"
+            Warnung "Einstellungen fuer das Trust Center > Makroeinstellungen)."
+            $offenePunkte.Add("Arbeitsmappe erzeugen - Trust-Center-Haken setzen und Installieren.cmd erneut starten, oder von Hand nach docs\EXCEL_SETUP.md (Weg B, ca. 5 Minuten)")
+        }
+    }
+}
+
+# Verknuepfung auf dem Desktop, damit der taegliche Start ein Klick ist.
+if (Test-Path $mappe) {
+    try {
+        $desktop = [Environment]::GetFolderPath("Desktop")
+        $lnk = Join-Path $desktop "LIMS-Probenassistent.lnk"
+        $shell = New-Object -ComObject WScript.Shell
+        $verknuepfung = $shell.CreateShortcut($lnk)
+        $verknuepfung.TargetPath = $mappe
+        $verknuepfung.WorkingDirectory = $Ziel
+        $verknuepfung.Description = "LIMS-Probenassistent oeffnen"
+        $verknuepfung.Save()
+        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($shell) | Out-Null
+        Gut "Verknuepfung auf dem Desktop angelegt"
+    } catch {
+        Warnung "Desktop-Verknuepfung nicht moeglich: $($_.Exception.Message)"
+    }
+}
+
+# ---------------------------------------------------------------------
+Schritt "7/7 Selbsttest"
 $exe = Join-Path $coreDir "lims_core.exe"
-& $exe --version
+& $exe --version | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "lims_core.exe --version fehlgeschlagen." }
 
 $roh = & $exe --config $configPfad health | Out-String
@@ -179,21 +280,31 @@ if ($LASTEXITCODE -ne 0) { throw "Selbstauskunft (health) fehlgeschlagen." }
 $health = $roh | ConvertFrom-Json
 if (-not $health.ok) { throw "Selbstauskunft meldet einen Fehler." }
 Gut "Kern antwortet, Version $($health.result.app_version)"
-Gut "OCR: $($health.result.ocr.engine) - $($health.result.ocr.detail)"
+Gut "OCR: $($health.result.ocr.engine)"
 if (-not $health.result.ocr.available) {
-    Warnung "OCR steht NICHT zur Verfuegung - gescannte PDFs und Fotos liefern keine Zeilen."
+    Warnung "OCR steht NICHT zur Verfuegung - Scans und Fotos liefern keine Zeilen."
+    $offenePunkte.Add("OCR pruefen: lims_core.exe --config config.json health")
+} elseif ($health.result.ocr.detail -notmatch "latin") {
+    $offenePunkte.Add("Optional fuer saubere deutsche Umlaute in Scans: provision_offline.ps1 -Step model")
 }
 
+# ---------------------------------------------------------------------
 Write-Host ""
-Write-Host "Einrichtung fertig." -ForegroundColor Green
-Write-Host "Ordner: $Ziel"
+if (Test-Path $mappe) {
+    Write-Host "Fertig - der Probenassistent ist einsatzbereit." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Zum Starten: Verknuepfung 'LIMS-Probenassistent' auf dem Desktop"
+    Write-Host "oder $mappe"
+    Write-Host "Beim Oeffnen fragt Excel nach Makros - diese zulassen."
+} else {
+    Write-Host "Der Rechenkern ist eingerichtet, die Arbeitsmappe fehlt noch." -ForegroundColor Yellow
+    Write-Host "Ordner: $Ziel"
+}
+
+if ($offenePunkte.Count -gt 0) {
+    Write-Host ""
+    Write-Host "Offen:" -ForegroundColor Yellow
+    foreach ($punkt in $offenePunkte) { Write-Host "  - $punkt" }
+}
 Write-Host ""
-Write-Host "Es fehlt noch die Excel-Mappe - dafuer wird Excel selbst gebraucht:" -ForegroundColor Yellow
-Write-Host "  powershell -ExecutionPolicy Bypass -File packaging\windows\build_workbook.ps1"
-Write-Host "  (oder in 5 Minuten von Hand: docs\EXCEL_SETUP.md, Weg B)"
-Write-Host "Die fertige LIMS-Probenassistent.xlsm gehoert direkt nach $Ziel."
-Write-Host ""
-Write-Host "Optional fuer bessere deutsche Umlaute in Scans:" -ForegroundColor Yellow
-Write-Host "  powershell -ExecutionPolicy Bypass -File packaging\windows\provision_offline.ps1 -Step model"
-Write-Host ""
-Write-Host "Danach: docs\ERSTE_SCHRITTE.md ab Schritt 4."
+Write-Host "Bedienung: docs\BEDIENUNG.md   Einrichtung im Detail: docs\ERSTE_SCHRITTE.md"

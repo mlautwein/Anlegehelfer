@@ -147,6 +147,7 @@ jobs:
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
           New-Item -ItemType Directory -Path "$stage\excel\vba-src" -Force | Out-Null
           New-Item -ItemType Directory -Path "$stage\docs" -Force | Out-Null
+          Copy-Item packaging\windows\Installieren.cmd      $stage
           Copy-Item packaging\windows\einrichten.ps1        $stage
           Copy-Item packaging\windows\build_workbook.ps1    $stage
           Copy-Item packaging\windows\provision_offline.ps1 $stage

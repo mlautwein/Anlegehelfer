@@ -8,8 +8,8 @@ Betrieb danach: `docs/BEDIENUNG.md`.
 - Einen **Windows-11-x64-Rechner** mit **Excel** (getestet gegen Excel 2016
   x64). Der Rechner braucht kein Python.
 - Einen Ordner, in dem gearbeitet wird - lokal oder auf einer Freigabe.
-  In dieser Anleitung: `C:\LIMS-PA`.
-- Fuer Schritt 1 und 3 einmalig Internet. Der spaetere Betrieb ist
+  Vorschlag der Installation: `C:\LIMS-Probenassistent`.
+- Einmalig Internet fuer die Installation (und fuer Schritt 3). Der spaetere Betrieb ist
   vollstaendig offline; ein Waechter blockiert zur Laufzeit jeden
   Netzwerkzugriff ausser Loopback.
 
@@ -17,50 +17,69 @@ Betrieb danach: `docs/BEDIENUNG.md`.
 > Excel-Oberflaeche (sie benutzt Win32-Clipboard und `OnTime`). Zum
 > Ausprobieren: siehe "Ohne Excel ausprobieren" ganz unten.
 
-## Schritt 1: Paket einrichten
+## Installation: zwei Klicks
 
-Von der [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases)
-das Archiv **`lims-probenassistent-<version>-einrichtung.zip`** laden und
-entpacken. Darin liegen die Skripte, die VBA-Quellen der Arbeitsmappe und
-diese Anleitung. Dann im entpackten Ordner:
+1. Von der [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases)
+   das Archiv **`lims-probenassistent-<version>-einrichtung.zip`**
+   herunterladen und entpacken (Rechtsklick > "Alle extrahieren").
+2. Im entpackten Ordner **`Installieren.cmd`** doppelklicken.
 
-    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA"
+Mehr ist nicht noetig. Windows meldet unter Umstaenden "Der Computer wurde
+durch Windows geschuetzt" - dann auf *Weitere Informationen* > *Trotzdem
+ausfuehren* klicken (die Datei stammt aus dem Internet und ist nicht
+signiert).
 
-Das Skript laedt den Rechenkern aus demselben Release, prueft die
-SHA-256-Pruefsumme, entpackt nach `C:\LIMS-PA\core\`, gleicht jede Datei
-gegen das mitgelieferte Hash-Manifest ab, schreibt eine passende
-`config.json` und faehrt einen Selbsttest. Am Ende steht, was noch fehlt.
+Das Skript fragt nur nach dem Arbeitsordner - Eingabetaste uebernimmt den
+Vorschlag `C:\LIMS-Probenassistent`. Danach laeuft alles allein:
 
-Kein Internet am Zielrechner? Dann zusaetzlich
-`lims_core-<version>-windows-x64.zip` samt `.sha256` vorab laden und
-mitgeben:
+- Rechenkern aus demselben Release laden, SHA-256 und Hash-Manifest pruefen
+- nach `core\` entpacken und `config.json` schreiben
+- **Arbeitsmappe mit Excel erzeugen** und in den Ordner legen
+- Verknuepfung auf dem Desktop anlegen
+- Selbsttest fahren
 
-    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.3.0-windows-x64.zip"
+Am Ende steht entweder "einsatzbereit" oder eine kurze Liste dessen, was
+noch offen ist. Zum Starten dann die Desktop-Verknuepfung - fertig.
 
-> Wer das Repository ohnehin ausgecheckt hat, findet dasselbe Skript unter
-> `packaging\windows\einrichten.ps1`.
+### Sonderfaelle
 
-## Schritt 2: Excel-Mappe erzeugen
+**Kein Internet am Zielrechner?** Zusaetzlich
+`lims_core-<version>-windows-x64.zip` samt `.sha256` vorab laden und das
+Skript von Hand mit dem Paket aufrufen:
+
+    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-Probenassistent" -Paket "D:\lims_core-0.4.0-windows-x64.zip"
+
+**Kein Excel auf diesem Rechner?** Die Einrichtung laeuft trotzdem durch und
+meldet die Mappe als offenen Punkt; erzeugen laesst sie sich dann auf einem
+Rechner mit Excel (Schritt 2 unten).
+
+**Repository ausgecheckt?** Dieselben Skripte liegen unter
+`packaging\windows\`.
+
+## Schritt 2: Arbeitsmappe nachholen
+
+**Nur noetig, wenn `Installieren.cmd` die Mappe als offenen Punkt gemeldet
+hat.** Im Normalfall ist sie bereits erzeugt.
 
 Die XLSM ist bewusst kein fertiges Auslieferungsstueck, sondern entsteht
-aus den VBA-Textmodulen unter `excel\vba-src\` (im entpackten
-Einrichtungsarchiv). Sie laesst sich nur mit Excel selbst
-bauen - dieser Schritt ist deshalb nicht automatisierbar.
+aus den VBA-Textmodulen unter `excel\vba-src\`. Sie laesst sich nur mit
+Excel selbst bauen - deshalb kann sie nicht vorgefertigt mitgeliefert
+werden.
 
-    powershell -ExecutionPolicy Bypass -File build_workbook.ps1
+Der haeufigste Grund fuer das Scheitern ist ein fehlender Haken in Excel:
 
-Dafuer muss einmalig **Datei > Optionen > Trust Center > Einstellungen fuer
-das Trust Center > Makroeinstellungen > "Zugriff auf das
-VBA-Projektobjektmodell vertrauen"** gesetzt sein; der Haken kann danach
-wieder weg. Ohne ihn bricht das Skript mit klarem Hinweis ab.
+> **Datei > Optionen > Trust Center > Einstellungen fuer das Trust Center >
+> Makroeinstellungen > "Zugriff auf das VBA-Projektobjektmodell vertrauen"**
 
-Alternative ohne Trust-Center-Aenderung: `docs/EXCEL_SETUP.md`, **Weg B** -
-elf Module importieren, `modSetup.EnsureUi` ausfuehren, fertig (ca. 5 min).
+Haken setzen, `Installieren.cmd` erneut doppelklicken - danach kann der
+Haken wieder weg.
 
-Die erzeugte `LIMS-Probenassistent.xlsm` nach `C:\LIMS-PA\` legen. Der
-Ordner sieht dann so aus:
+Ohne Aenderung am Trust Center geht es auch von Hand in etwa fuenf Minuten:
+`docs/EXCEL_SETUP.md`, **Weg B** - elf Module importieren,
+`modSetup.EnsureUi` ausfuehren, fertig. Die erzeugte
+`LIMS-Probenassistent.xlsm` gehoert dann in den Arbeitsordner:
 
-    C:\LIMS-PA\
+    C:\LIMS-Probenassistent\
       LIMS-Probenassistent.xlsm
       config.json
       core\
@@ -82,16 +101,18 @@ Danach die berechnete SHA-256 in `packaging\models\manifest.json` eintragen.
 Ob es greift, verraet die Selbstauskunft - `ocr.detail` nennt das aktive
 Modell:
 
-    C:\LIMS-PA\core\lims_core.exe --config C:\LIMS-PA\config.json health
+    C:\LIMS-Probenassistent\core\lims_core.exe --config C:\LIMS-Probenassistent\config.json health
 
 **Digitale PDFs und Excel-Dateien sind davon nicht betroffen**, nur Scans
 und Fotos.
 
 ## Schritt 4: Erster Durchlauf
 
-`LIMS-Probenassistent.xlsm` oeffnen (Makros zulassen). Zum Ausprobieren
-liegen im Repository unter `fixtures\synthetic\` fertige Beispieldateien -
-`klinik_digital.pdf` ergibt 14 Zeilen.
+Die Desktop-Verknuepfung **LIMS-Probenassistent** anklicken (oder die
+XLSM im Arbeitsordner). Excel fragt nach Makros - diese zulassen.
+
+Zum Ausprobieren liegen im Repository unter `fixtures\synthetic\` fertige
+Beispieldateien; `klinik_digital.pdf` ergibt 14 Zeilen.
 
 Im Blatt `Assistent`: **Dateien waehlen** > **Analyse starten**. Die Zeilen
 erscheinen im Blatt `Ergebnisse` in genau fuenf Spalten. Gelb heisst
@@ -106,8 +127,9 @@ Ab hier: `docs/BEDIENUNG.md`.
 
 | Symptom | Ursache und Abhilfe |
 |---|---|
+| Windows warnt beim Start von `Installieren.cmd` | *Weitere Informationen* > *Trotzdem ausfuehren*. Die Datei ist nicht signiert. |
 | Doppelklick auf `lims_core.exe` bewirkt nichts | Richtig so - der Kern hat keine eigene Oberflaeche und wird von der Arbeitsmappe gesteuert. Er zeigt beim Start ohne Kommando einen Hinweistext. Zum Pruefen: `lims_core.exe health` in einer Eingabeaufforderung. Siehe auch `core\LIESMICH.txt`. |
-| Es ist keine Excel-Mappe im Paket | Richtig - sie entsteht einmalig aus den VBA-Quellen und braucht dafuer Excel selbst (Schritt 2). |
+| Es ist keine Excel-Mappe im Paket | Richtig - `Installieren.cmd` erzeugt sie beim Einrichten. Klappt das nicht, meldet es das als offenen Punkt (Schritt 2). |
 | `einrichten.ps1` meldet "core\ existiert bereits" | Absicht, damit nichts unbemerkt ueberschrieben wird. Mit `-Ueberschreiben` erneut aufrufen. |
 | "SHA-256 stimmt nicht" | Uebertragung unvollstaendig oder Paket manipuliert. Neu laden, **nicht** verwenden. |
 | Selbsttest meldet "OCR steht NICHT zur Verfuegung" | Paket unvollstaendig entpackt. Schritt 1 mit `-Ueberschreiben` wiederholen. |

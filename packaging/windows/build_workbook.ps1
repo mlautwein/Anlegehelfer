@@ -12,12 +12,41 @@
 # Ergebnis: dist\LIMS-Probenassistent.xlsm
 # =====================================================================
 
+[CmdletBinding()]
+param(
+    # Ordner mit den VBA-Textmodulen. Ohne Angabe wird gesucht.
+    [string]$VbaDir = "",
+    # Zieldatei. Ohne Angabe: dist\LIMS-Probenassistent.xlsm neben dem Skript.
+    [string]$Ziel = ""
+)
+
 $ErrorActionPreference = "Stop"
-$repo = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$vbaDir = Join-Path $repo "excel\vba-src"
-$outDir = Join-Path $repo "dist"
-$outFile = Join-Path $outDir "LIMS-Probenassistent.xlsm"
+
+# Das Skript wird aus zwei Layouts heraus aufgerufen: aus dem entpackten
+# Einrichtungsarchiv (excel\vba-src liegt daneben) und aus dem Repository
+# (packaging\windows\..). Beide Faelle abdecken, statt einen anzunehmen.
+if (-not $VbaDir) {
+    foreach ($kandidat in @(
+        (Join-Path $PSScriptRoot "excel\vba-src"),
+        (Join-Path $PSScriptRoot "..\..\excel\vba-src")
+    )) {
+        if (Test-Path $kandidat) { $VbaDir = (Resolve-Path $kandidat).Path; break }
+    }
+}
+if (-not $VbaDir -or -not (Test-Path $VbaDir)) {
+    throw ("VBA-Quellmodule nicht gefunden. Erwartet neben diesem Skript " +
+        "unter excel\vba-src oder im Repository. Pfad per -VbaDir angeben.")
+}
+
+if ($Ziel) {
+    $outFile = [System.IO.Path]::GetFullPath($Ziel)
+    $outDir = Split-Path $outFile -Parent
+} else {
+    $outDir = Join-Path $PSScriptRoot "dist"
+    $outFile = Join-Path $outDir "LIMS-Probenassistent.xlsm"
+}
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+Write-Host ("VBA-Quellen: {0}" -f $VbaDir)
 
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
