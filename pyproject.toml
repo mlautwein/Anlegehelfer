@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lims-assistant-core"
+version = "0.1.0"
+description = "Lokaler LIMS-Probenassistent - portabler Offline-Rechenkern (Import, OCR, Normalisierung, Lernen, Export)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary - interne Nutzung" }
+dependencies = [
+    "pydantic>=2.7,<3",
+    "pdfplumber>=0.11,<0.12",
+    "pypdfium2>=4.30,<5",
+    "openpyxl>=3.1,<4",
+    "xlrd>=2.0.1,<3",
+    "Pillow>=10.3",
+    "pillow-heif>=0.16",
+]
+
+[project.optional-dependencies]
+ocr = [
+    "rapidocr-onnxruntime>=1.3.24,<2",
+]
+dev = [
+    "pytest>=8",
+    "reportlab>=4.1",
+    "xlwt>=1.3",
+    "psutil>=5.9",
+]
+
+[project.scripts]
+lims-core = "lims_assistant.jobs.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["core/src"]
+
+[tool.pytest.ini_options]
+testpaths = ["core/tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning:xlrd.*",
+    "ignore::DeprecationWarning:reportlab.*",
+]

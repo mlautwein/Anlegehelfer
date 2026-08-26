@@ -1,0 +1,33 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Niemals einchecken: reale Dokumente, extrahierte Texte, Lerndaten, Modelle, Geheimnisse
+real-data/
+*.gguf
+*.onnx
+models-cache/
+packaging/models/downloads/
+*.sqlite
+*.sqlite3
+*.db
+secrets*
+.env
+
+# Excel-Binärartefakte (Quelle sind die Textmodule unter excel/vba-src)
+*.xlsm
+!fixtures/synthetic/**/*.xlsm
+
+# Betriebsdaten
+jobs-work/
+*.log
+.DS_Store
+Thumbs.db
+
+# Benchmark-Rohdaten mit Zeitstempeln bleiben lokal; kuratierte Berichte liegen in docs/benchmarks
+docs/benchmarks/raw/
