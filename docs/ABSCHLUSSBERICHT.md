@@ -119,11 +119,25 @@ fuer Latin-OCR-Modell und Qwen3-4B, gefolgt von `scripts/benchmark_llm.py`.
 
 ## 7. Git-Status
 
-- Lokales Repository initialisiert, Branch `main`, 7 logische Commits
-  (Skelett -> Kern -> Fixtures/OCR-Spike -> Testsuite -> VBA/Packaging ->
-  Doku -> Abschlussbericht), Arbeitsbaum sauber.
-- GitHub: `gh` CLI in der Umgebung nicht vorhanden/nicht authentifiziert ->
-  **kein Remote erstellt** (auftragsgemaess nur bei authentifiziertem gh).
-  Einrichtung spaeter: `gh repo create lims-probenassistent --private
-  --source . --push` (niemals oeffentlich; .gitignore haelt reale Daten,
-  Modelle und Geheimnisse fern).
+- Lokales Repository, Branch `main`, Arbeitsbaum sauber.
+- GitHub: **`mlautwein/Anlegehelfer`, Sichtbarkeit `private`** (Stand
+  26.08.2026 gepusht). Die `.gitignore` haelt reale Daten, Modelle und
+  Geheimnisse fern; ein Scan der 158 versionierten Dateien vor dem Push hat
+  keine Schluessel oder Zugangsdaten gefunden.
+- Versionierung/Release: `CHANGELOG.md` nach Keep-a-Changelog,
+  Release ueber Versionstag `v<version>`. Der Workflow
+  `.github/workflows/release.yml` gleicht Tag, `APP_VERSION`,
+  `pyproject.toml` und Changelog-Abschnitt ab, faehrt danach das komplette
+  CI-Gate und veroeffentlicht erst dann das Windows-x64-Paket mit
+  SHA-256-Pruefsumme. `0.y.z` gilt automatisch als Vorabversion.
+
+### Nachtrag zur CI (26.08.2026)
+
+Der erste CI-Lauf auf GitHub war auf `macos-latest` rot: vier OCR-Tests
+schlugen fehl. Ursache war nicht die OCR, sondern die Fixture-Erzeugung -
+`scripts/make_fixtures.py` kannte nur Linux-Schriftpfade und fiel sonst
+stillschweigend auf den nicht skalierbaren Bitmap-Default von Pillow zurueck,
+wodurch die Scan-Bilder unlesbar wurden. Die Schriftsuche deckt jetzt Linux,
+macOS und Windows ab und bricht mit klarer Meldung ab, statt einen
+unbrauchbaren Korpus zu erzeugen. Gegenprobe auf macOS 26 (Python 3.12.13,
+RapidOCR): **120 passed** - identisch zur Linux-Zahl aus Abschnitt 2.

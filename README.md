@@ -1,5 +1,15 @@
 # LIMS-Probenassistent
 
+[![CI](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml/badge.svg)](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml)
+
+**Version 0.1.0** (Vorabversion - Windows-Build und Excel-2016-Abnahme sind
+offene Gates) · Jobvertrag `1.0` · [Changelog](CHANGELOG.md) ·
+[Releases](https://github.com/mlautwein/Anlegehelfer/releases)
+
+> Privates Repository. Die Software ist proprietaer und ausschliesslich fuer
+> die interne Nutzung bestimmt (siehe [LICENSE](LICENSE)); reale Dokumente,
+> Modelle und Geheimnisse gehoeren nicht hinein.
+
 Lokaler, vollstaendig offline arbeitender Assistent zur Aufbereitung von
 Trinkwasser-Arbeitslisten. Das Werkzeug liest PDF-Dokumente (mit Textschicht
 oder gescannt), Fotos/Bilder (JPG, PNG, HEIC) und Excel-Dateien (XLSX, XLS,
@@ -37,9 +47,15 @@ ueber versionierte JSON-Jobdateien (`contracts/schemas/`).
     python scripts/make_fixtures.py  # synthetischen Korpus erzeugen
     pytest                           # komplette Testsuite
     python scripts/benchmark_pipeline.py --runs 3
+    lims-core --version              # Kern- und Jobvertragsversion
 
 Fuer die Dev-OCR mit korrekten deutschen Umlauten: `tesseract` mit Sprachpaket
 `deu` installieren (macOS: `brew install tesseract tesseract-lang`).
+
+Die Scan-Fixtures werden mit einer Systemschrift gerendert (Linux DejaVu,
+macOS/Windows Arial). Findet `scripts/make_fixtures.py` keine skalierbare
+Schrift, bricht es mit einer Meldung ab, statt einen unlesbaren Korpus zu
+erzeugen.
 
 ## Windows-Bereitstellung (Kurzfassung)
 
@@ -54,6 +70,23 @@ Fuer die Dev-OCR mit korrekten deutschen Umlauten: `tesseract` mit Sprachpaket
 4. Gemeinsamen Ordner bestuecken: `LIMS-Probenassistent.xlsm`, `config.json`,
    `core\` (EXE-Ordner). Details: `docs/WINDOWS_BUILD.md`.
 5. Abnahme auf Windows 11 x64 + Excel 2016 x64: `docs/ABNAHME_EXCEL2016.md`.
+
+## Release erstellen
+
+Releases entstehen ausschliesslich ueber einen Versionstag; der Workflow
+`.github/workflows/release.yml` prueft zuerst, ob Tag, `APP_VERSION`,
+`pyproject.toml` und der Changelog-Abschnitt zusammenpassen, faehrt dann das
+komplette CI-Gate und baut erst danach das Paket.
+
+1. `CHANGELOG.md`: Abschnitt `## [<version>] - <datum>` fuellen.
+2. Version in `core/src/lims_assistant/version.py` (`APP_VERSION`) und
+   `pyproject.toml` gleichziehen.
+3. `git tag -a v<version> -m "..." && git push origin v<version>`.
+
+Ergebnis des Workflows: GitHub-Release mit
+`lims_core-<version>-windows-x64.zip` (portable onedir-EXE inklusive
+`hashes.json`) und zugehoeriger `.sha256`-Pruefsumme. Versionen `0.y.z` und
+Tags mit Suffix werden automatisch als Vorabversion markiert.
 
 ## Wichtige Grundsaetze
 
@@ -72,6 +105,7 @@ Fuer die Dev-OCR mit korrekten deutschen Umlauten: `tesseract` mit Sprachpaket
 
 | Thema | Datei |
 |---|---|
+| Aenderungen je Version | `CHANGELOG.md` |
 | Ausfuehrungsnotiz/Ist-Stand | `docs/AUSFUEHRUNGSNOTIZ.md` |
 | Architektur | `docs/ARCHITEKTUR.md` |
 | Bedienung (Anwender) | `docs/BEDIENUNG.md` |
