@@ -10,6 +10,14 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ## [Unveroeffentlicht]
 
+## [0.2.0] - 2026-08-26
+
+Macht die Auslieferung tatsaechlich benutzbar: eine Einrichtung in einem
+Durchgang und die Reparatur eines Fehlers, der die OCR im ausgelieferten
+Paket komplett abgeschaltet haette. 122 Tests gruen auf Linux, macOS und
+Windows. Jobvertrag `1.0` unveraendert - bestehende Jobdateien bleiben
+gueltig.
+
 ### Hinzugefuegt
 
 - `packaging/windows/einrichten.ps1` richtet den gemeinsamen Ordner in einem
@@ -154,5 +162,6 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   sind dagegen unempfindlich; die dokumentierten Benchmarkzahlen beziehen
   sich auf den unter Linux erzeugten Korpus.
 
-[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.1.0...HEAD
+[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.1.0

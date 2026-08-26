@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml/badge.svg)](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml)
 
-**Version 0.1.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
+**Version 0.2.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
 offen) · Jobvertrag `1.0` · [Erste Schritte](docs/ERSTE_SCHRITTE.md) ·
 [Changelog](CHANGELOG.md) ·
 [Releases](https://github.com/mlautwein/Anlegehelfer/releases)

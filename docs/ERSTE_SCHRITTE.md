@@ -32,7 +32,7 @@ Kein Internet am Zielrechner? Das ZIP samt `.sha256` vorab von der
 [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases) laden
 und mitgeben:
 
-    powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.1.0-windows-x64.zip"
+    powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.2.0-windows-x64.zip"
 
 ## Schritt 2: Excel-Mappe erzeugen
 
