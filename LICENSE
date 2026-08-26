@@ -1,0 +1,9 @@
+LIMS-Probenassistent
+Copyright (c) 2026 Marius Lautwein
+
+Proprietaere Software fuer die interne Nutzung. Alle Rechte vorbehalten.
+Keine Weitergabe, Veroeffentlichung oder Nutzung ausserhalb des
+vorgesehenen internen Einsatzes ohne ausdrueckliche Zustimmung.
+
+Drittanbieterkomponenten unterliegen ihren eigenen Lizenzen -
+siehe docs/LIZENZEN.md und packaging/models/manifest.json.

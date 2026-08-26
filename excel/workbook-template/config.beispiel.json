@@ -1,0 +1,29 @@
+{
+  "share_dir": ".",
+  "core_exe": "core/lims_core.exe",
+  "job_root": "",
+  "certainty_threshold": 0.75,
+  "retrieval_min_similarity": 0.42,
+  "retrieval_top_k": 5,
+  "offline_strict": true,
+  "export_encoding": "utf8_bom",
+  "stale_lock_minutes": 12,
+  "ocr": {
+    "engine": "auto",
+    "rec_model_path": "core/models/ocr/latin_PP-OCRv3_rec_infer.onnx",
+    "dict_path": "core/models/ocr/latin_dict.txt",
+    "render_dpi": 170,
+    "min_confidence": 0.55
+  },
+  "llm": {
+    "enabled": false,
+    "model_path": "core/models/llm/QWEN3-4B-INSTRUCT-2507-Q4_K_M.gguf",
+    "model_sha256": "",
+    "server_binary": "core/llm/llama-server.exe",
+    "port": 18081,
+    "ctx_size": 4096,
+    "threads": 0,
+    "timeout_s": 120,
+    "max_rows_per_call": 12
+  }
+}
