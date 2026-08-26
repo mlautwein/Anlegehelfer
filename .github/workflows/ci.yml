@@ -75,7 +75,9 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip freeze --exclude-editable > constraints-windows-x64.txt
-          if ! diff <(grep -vE '^#|^$' packaging/windows/constraints-windows-x64.txt | sort -f) <(sort -f constraints-windows-x64.txt); then
+          # tr -d '\r': pip schreibt auf Windows CRLF, die Datei im Repo hat LF.
+          if ! diff <(grep -vE '^#|^$' packaging/windows/constraints-windows-x64.txt | tr -d '\r' | sort -f) \
+                    <(tr -d '\r' < constraints-windows-x64.txt | sort -f); then
             echo "::error::Installierte Versionen weichen von packaging/windows/constraints-windows-x64.txt ab. Artefakt constraints-windows-x64 herunterladen und die Datei aktualisieren."
             exit 1
           fi
