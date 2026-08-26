@@ -50,6 +50,38 @@ manuell in ca. 5 Minuten).
 Struktur und `config.json`: siehe `docs/EXCEL_SETUP.md`. Danach auf einem
 Zielrechner die Abnahme nach `docs/ABNAHME_EXCEL2016.md` durchfuehren.
 
+## 4b. Was ueber GitHub Actions testbar ist - und was nicht
+
+Sobald das private Repository gepusht ist, schliesst die CI einen grossen
+Teil der offenen Gates automatisch:
+
+- `test` (ubuntu + macos): komplette Kern-Testsuite inkl. OCR und VBA-Lint.
+- `build-windows`: komplette Testsuite AUF WINDOWS, PyInstaller-onedir-Build,
+  `health`- und Analyze-Smoke ueber das echte Jobprotokoll, fertiges
+  EXE-Paket als herunterladbares Artefakt (`lims_core-windows-x64`) - dieses
+  Artefakt kann direkt als `core\` in den gemeinsamen Ordner uebernommen
+  werden.
+- `LLM-Benchmark (manuell)` (`benchmark-llm.yml`, per Knopfdruck je
+  Kandidat): laedt llama.cpp + GGUF auf den Runner, misst Schema-Validitaet,
+  Feldtreffer, Injektionsresistenz und legt den Bericht als Artefakt ab.
+  Qualitaetsmetriken sind uebertragbar; Laufzeit/RAM des Runners sind nur
+  indikativ.
+
+NICHT ueber GitHub testbar (bleibt manuell):
+
+- Excel-2016-x64-Abnahme: GitHub-Runner haben kein Microsoft Office
+  (Lizenz/Installation), und die VBA-Oberflaeche (Buttons, Strg+C,
+  Zwischenablage, OnTime, Dialoge) ist interaktiv - `docs/ABNAHME_EXCEL2016.md`
+  auf einem echten Ziel-PC. (Perspektivisch waere ein self-hosted Runner mit
+  Excel fuer Teilautomatisierung denkbar - V3-Thema.)
+- Die 2-Minuten-/16-GB-Messung auf der realen Zielhardware (Abschnitt F).
+- Alles mit echten Dokumenten: reale Arbeitslisten duerfen das Haus nicht
+  verlassen und werden niemals gepusht oder in CI verarbeitet.
+
+Hinweis zu Kosten: In privaten Repos zaehlen Windows-Minuten doppelt und
+macOS-Minuten zehnfach auf das Actions-Kontingent; der macOS-Job kann bei
+Bedarf auf `workflow_dispatch` umgestellt werden.
+
 ## 5. Modell-Benchmark (Gate vor LLM-Aktivierung)
 
     python scripts\benchmark_llm.py --model dist\lims_core\models\llm\<kandidat>.gguf `

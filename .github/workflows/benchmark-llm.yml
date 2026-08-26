@@ -1,0 +1,124 @@
+name: LLM-Benchmark (manuell)
+
+# Manuell startbarer Modellvergleich (Actions -> "LLM-Benchmark (manuell)" ->
+# Run workflow). Laedt llama.cpp und ein GGUF-Modell auf den Runner, fuehrt
+# scripts/benchmark_llm.py aus und laedt den Bericht als Artefakt hoch.
+#
+# WICHTIG zur Einordnung:
+# - Qualitaetsmetriken (Schema-Validitaet, Feldtreffer, Injektionsresistenz)
+#   sind uebertragbar. Laufzeit/RAM gelten fuer den GitHub-Runner (4 vCPU)
+#   und sind nur INDIKATIV - die 2-Minuten-/16-GB-Pruefung erfolgt final auf
+#   dem Ziel-PC (docs/ABNAHME_EXCEL2016.md, Abschnitt F).
+# - Modell-Downloads passieren nur hier im Build/Benchmark - nie zur Laufzeit.
+# - Je Kandidat einmal mit passenden Eingaben starten; Ergebnisse in
+#   docs/MODELLVERGLEICH.md uebertragen und erst dann ein Modell pinnen.
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_repo:
+        description: "HuggingFace-Repo der GGUF-Datei (bei 404 anpassen)"
+        default: "Qwen/Qwen3-4B-Instruct-2507-GGUF"
+        required: true
+      model_file:
+        description: "GGUF-Dateiname im Repo (Q4_K_M bevorzugt)"
+        default: "Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
+        required: true
+      candidate_name:
+        description: "Kandidaten-ID fuer Bericht/Manifest"
+        default: "qwen3-4b-instruct-2507-q4_k_m"
+        required: true
+      llama_tag:
+        description: "llama.cpp-Release-Tag (leer = neuestes Release; das tatsaechlich genutzte Tag steht im Log und gehoert ins Manifest)"
+        default: ""
+        required: false
+      runner:
+        description: "windows-latest = zielplattformnah, ubuntu-latest = schneller/guenstiger"
+        type: choice
+        options: [windows-latest, ubuntu-latest]
+        default: windows-latest
+        required: true
+
+jobs:
+  benchmark:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Abhaengigkeiten
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" huggingface_hub
+
+      - name: llama.cpp-Release laden und entpacken
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p llm-runtime
+          if [ "${{ inputs.runner }}" = "ubuntu-latest" ]; then
+            PATTERNS="*bin-ubuntu-x64.zip *bin-ubuntu-cpu-x64.zip"
+          else
+            PATTERNS="*bin-win-cpu-x64.zip *bin-win-avx2-x64.zip *bin-win-cpu-*x64.zip"
+          fi
+          TAGARG=""
+          if [ -n "${{ inputs.llama_tag }}" ]; then TAGARG="${{ inputs.llama_tag }}"; fi
+          OK=0
+          for P in $PATTERNS; do
+            echo "Versuche Asset-Muster: $P"
+            if gh release download $TAGARG --repo ggml-org/llama.cpp --pattern "$P" -D llm-runtime 2>/dev/null; then
+              OK=1; break
+            fi
+          done
+          if [ "$OK" != "1" ]; then
+            echo "::error::Kein passendes llama.cpp-Asset gefunden. Release-Assets pruefen:"
+            gh release view $TAGARG --repo ggml-org/llama.cpp --json tagName,assets \
+              --jq '.tagName, (.assets[].name)' || true
+            exit 1
+          fi
+          echo "Verwendetes Release:"
+          gh release view $TAGARG --repo ggml-org/llama.cpp --json tagName --jq .tagName
+          for Z in llm-runtime/*.zip; do python -m zipfile -e "$Z" llm-runtime/; done
+          SERVER=$(find llm-runtime -type f \( -name "llama-server" -o -name "llama-server.exe" \) | head -1)
+          if [ -z "$SERVER" ]; then echo "::error::llama-server nicht im Release-Zip gefunden"; exit 1; fi
+          chmod +x "$SERVER" 2>/dev/null || true
+          echo "SERVER_BIN=$SERVER" >> "$GITHUB_ENV"
+          echo "llama-server: $SERVER"
+
+      - name: GGUF-Modell laden (nur fuer diesen Benchmark)
+        shell: bash
+        env:
+          MODEL_REPO: ${{ inputs.model_repo }}
+          MODEL_FILE: ${{ inputs.model_file }}
+        run: |
+          set -euo pipefail
+          MODEL=$(python -c "import os; from huggingface_hub import hf_hub_download; print(hf_hub_download(repo_id=os.environ['MODEL_REPO'], filename=os.environ['MODEL_FILE']))")
+          echo "MODEL_PATH=$MODEL" >> "$GITHUB_ENV"
+          export MODEL
+          python -c "import hashlib, os; print('SHA-256 (ins Manifest uebernehmen):', hashlib.sha256(open(os.environ['MODEL'],'rb').read()).hexdigest())"
+
+      - name: Benchmark ausfuehren
+        shell: bash
+        run: |
+          python scripts/benchmark_llm.py \
+            --model "$MODEL_PATH" \
+            --server "$SERVER_BIN" \
+            --name "${{ inputs.candidate_name }}" \
+            --runs 3 \
+            --out "docs/benchmarks/llm-ci-${{ inputs.candidate_name }}.md"
+          echo "Hinweis: Laufzeitwerte gelten fuer diesen Runner, nicht fuer den Ziel-PC." \
+            >> "docs/benchmarks/llm-ci-${{ inputs.candidate_name }}.md"
+
+      - name: Bericht als Artefakt
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-benchmark-${{ inputs.candidate_name }}
+          path: docs/benchmarks/llm-ci-${{ inputs.candidate_name }}.md
+          retention-days: 90
