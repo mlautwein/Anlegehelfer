@@ -13,8 +13,10 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 ## [0.1.0] - 2026-08-26
 
 Erste Vorabversion (MVP). Der Rechenkern ist end-to-end funktionsfaehig und
-automatisiert getestet; die Windows-/Excel-Gates sind noch offen (siehe
-"Bekannte Einschraenkungen"). Jobvertrag `1.0`, DB-Schema `1`,
+automatisiert getestet - 120 Tests gruen auf Linux, macOS und Windows, das
+Windows-x64-Paket wird in CI gebaut und smoke-getestet. Offen bleiben die
+manuelle Excel-2016-Abnahme und die Provisionierung der OCR-/LLM-Modelle
+(siehe "Bekannte Einschraenkungen"). Jobvertrag `1.0`, DB-Schema `1`,
 Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
 
 ### Hinzugefuegt
@@ -101,6 +103,14 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   in `packaging/models/manifest.json` beschrieben, aber ohne Hashes; die
   Downloads waren in der Entwicklungsumgebung gesperrt
   (`docs/MODELLVERGLEICH.md`).
+- **Das ausgelieferte Paket enthaelt nur die RapidOCR-Standardmodelle**
+  (`ch_PP-OCRv4_*`, chinesisch/englisch). Diese verlieren deutsche Umlaute
+  ("Teekuche" statt "Teekueche"); die Fuzzy-Reparatur faengt das ab, markiert
+  die Werte aber gelb. Fuer saubere deutsche OCR muss vor dem Offline-Einsatz
+  das Latin-Modell provisioniert werden:
+  `packaging/windows/provision_offline.ps1 -Step model`
+  (Details in `docs/WINDOWS_BUILD.md`). Tesseract ist bewusst nicht im Paket -
+  es ist der Entwicklungspfad, nicht der Auslieferungspfad.
 - **Genauigkeitswerte gelten nur fuer den synthetischen Korpus.** Dieser
   wurde zusammen mit dem Extraktor entwickelt; reale Pilotgenauigkeit ist
   erst mit anonymisierten Originaldokumenten messbar.

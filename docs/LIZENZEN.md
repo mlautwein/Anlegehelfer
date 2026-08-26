@@ -1,6 +1,8 @@
 # Lizenzen und Drittanbieter-Manifest
 
-Eigener Code: proprietaer, interne Nutzung (siehe `LICENSE`). Reale
+Eigener Code: "source available" - oeffentlich einsehbar, aber **keine
+Open-Source-Lizenz**. Alle Rechte vorbehalten; Nutzung, Bearbeitung und
+Weitergabe nur mit schriftlicher Zustimmung (siehe `LICENSE`). Reale
 Dokumente, extrahierte Texte, Lerndaten, Modelle und Geheimnisse werden
 niemals eingecheckt.
 

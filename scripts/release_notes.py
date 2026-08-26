@@ -45,9 +45,18 @@ def main(argv: list[str] | None = None) -> int:
     body = extract(args.version, CHANGELOG.read_text(encoding="utf-8"))
     notes = (
         f"{body}\n\n---\n\n"
-        "Das Paket `lims_core-<version>-windows-x64.zip` enthaelt die portable\n"
+        "## Zum Paket\n\n"
+        f"`lims_core-{args.version}-windows-x64.zip` enthaelt die portable\n"
         "onedir-EXE inklusive `hashes.json`. Pruefsumme des ZIP siehe\n"
-        "beiliegende `.sha256`-Datei. Bereitstellung: `docs/WINDOWS_BUILD.md`.\n"
+        "beiliegende `.sha256`-Datei:\n\n"
+        "```\n"
+        f"shasum -a 256 -c lims_core-{args.version}-windows-x64.zip.sha256\n"
+        "```\n\n"
+        "**Vor dem Offline-Einsatz:** Das Paket bringt nur die\n"
+        "RapidOCR-Standardmodelle (chinesisch/englisch) mit, die deutsche\n"
+        "Umlaute verlieren. Latin-Modell provisionieren mit\n"
+        "`packaging/windows/provision_offline.ps1 -Step model`.\n"
+        "Vollstaendige Bereitstellung: `docs/WINDOWS_BUILD.md`.\n"
     )
     if args.out:
         out = Path(args.out)

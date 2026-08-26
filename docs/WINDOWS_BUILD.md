@@ -52,8 +52,9 @@ Zielrechner die Abnahme nach `docs/ABNAHME_EXCEL2016.md` durchfuehren.
 
 ## 4b. Was ueber GitHub Actions testbar ist - und was nicht
 
-Sobald das private Repository gepusht ist, schliesst die CI einen grossen
-Teil der offenen Gates automatisch:
+Das Repository ist gepusht (`mlautwein/Anlegehelfer`, oeffentlich), die CI
+laeuft und hat damit einen grossen Teil der Gates bereits geschlossen -
+Stand v0.1.0 sind alle drei Jobs gruen:
 
 - `test` (ubuntu + macos): komplette Kern-Testsuite inkl. OCR und VBA-Lint.
 - `build-windows`: komplette Testsuite AUF WINDOWS, PyInstaller-onedir-Build,
@@ -78,8 +79,10 @@ NICHT ueber GitHub testbar (bleibt manuell):
 - Alles mit echten Dokumenten: reale Arbeitslisten duerfen das Haus nicht
   verlassen und werden niemals gepusht oder in CI verarbeitet.
 
-Hinweis zu Kosten: In privaten Repos zaehlen Windows-Minuten doppelt und
-macOS-Minuten zehnfach auf das Actions-Kontingent; der macOS-Job kann bei
+Hinweis zu Kosten: Fuer **oeffentliche** Repositories sind Actions-Minuten
+kostenfrei - im aktuellen Zustand entstehen also keine Kosten. Wird das
+Repository auf privat umgestellt, zaehlen Windows-Minuten doppelt und
+macOS-Minuten zehnfach auf das Kontingent; der macOS-Job kann dann bei
 Bedarf auf `workflow_dispatch` umgestellt werden.
 
 ## 5. Modell-Benchmark (Gate vor LLM-Aktivierung)
