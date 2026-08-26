@@ -16,6 +16,10 @@ from lims_assistant.domain.entities import FIELDS, Provenance
 from lims_assistant.normalize.compose import Composed
 
 SCORE_RETRIEVAL_FACTOR = 0.85
+# Nahezu identischer bestaetigter/korrigierter Fall: die Benutzerkorrektur
+# soll den direkten Dokumentwert ueberstimmen (bleibt trotzdem gelb).
+HIGH_SIM = 0.90
+HIGH_SIM_SCORE = 0.97
 SCORE_LLM = 0.60
 SCORE_HINT = 0.50
 SCORE_DOC_CONTEXT = 0.70
@@ -125,12 +129,16 @@ def fuse_row(
             )
         hit = retrieval.get(name)
         if hit and hit[0]:
+            sim = hit[1]
+            score = sim * SCORE_RETRIEVAL_FACTOR
+            if sim >= HIGH_SIM:
+                score = max(score, HIGH_SIM_SCORE * sim)
             cands.append(
                 Candidate(
                     hit[0],
                     Provenance.RETRIEVAL.value,
-                    round(hit[1] * SCORE_RETRIEVAL_FACTOR, 4),
-                    f"retrieval:sim={hit[1]:.2f}",
+                    round(score, 4),
+                    f"retrieval:sim={sim:.2f}",
                 )
             )
         llm_val = llm_fields.get(name, "")

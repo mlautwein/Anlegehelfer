@@ -38,19 +38,16 @@ _CP1252_FALLBACK = str.maketrans(
 )
 
 
-def _quote_csv(value: str) -> str:
-    """Minimales CSV-Quoting fuer einspaltige Dateien."""
-    if value == "":
-        return ""
-    needs = any(ch in value for ch in ('"', ";", ",")) or value != value.strip()
-    if needs:
-        return '"' + value.replace('"', '""') + '"'
-    return value
-
-
 def render_column(values: list[str]) -> str:
-    """Dateiinhalt einer Spalte (jede Zeile mit CRLF terminiert)."""
-    lines = [_quote_csv(sanitize_lims_value(v)) for v in values]
+    """Dateiinhalt einer Spalte (jede Zeile mit CRLF terminiert).
+
+    Bewusst KEIN CSV-Quoting: Die Dateien sind einspaltige Zeilenlisten fuer
+    die LIMS-Uebernahme. Kommas sind regulaerer Bestandteil der Werte
+    ("5. OG, Zimmer 530, ..."); Anfuehrungszeichen wuerden die Werte
+    verfaelschen. Zeilenumbrueche/Tabs sind bereits deterministisch zu
+    Leerzeichen normalisiert, daher ist jede Zeile exakt ein Wert.
+    """
+    lines = [sanitize_lims_value(v) for v in values]
     if not lines:
         return ""
     return CRLF.join(lines) + CRLF
