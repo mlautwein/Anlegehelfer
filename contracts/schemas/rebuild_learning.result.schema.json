@@ -1,0 +1,33 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "examples_active": {
+      "default": 0,
+      "title": "Examples Active",
+      "type": "integer"
+    },
+    "examples_inactive": {
+      "default": 0,
+      "title": "Examples Inactive",
+      "type": "integer"
+    },
+    "index_hash": {
+      "default": "",
+      "title": "Index Hash",
+      "type": "string"
+    },
+    "row_examples_active": {
+      "default": 0,
+      "title": "Row Examples Active",
+      "type": "integer"
+    },
+    "row_model_hash": {
+      "default": "",
+      "title": "Row Model Hash",
+      "type": "string"
+    }
+  },
+  "title": "RebuildLearningResult",
+  "type": "object"
+}

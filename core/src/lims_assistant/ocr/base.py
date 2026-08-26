@@ -55,8 +55,17 @@ def get_engine(cfg: OcrConfig) -> "OcrEngine | None":
         candidates = [RapidOcrEngine(cfg)]
     elif cfg.engine == "tesseract":
         candidates = [TesseractEngine(cfg)]
-    else:  # auto
-        candidates = [RapidOcrEngine(cfg), TesseractEngine(cfg)]
+    else:
+        # auto - Dev-Spike-Ergebnis (docs/benchmarks): Die gebuendelten
+        # RapidOCR-Standardmodelle (ch/en) verlieren deutsche Umlaute
+        # ("Teekuche", "GroSe"); Tesseract-deu erkennt sie fehlerfrei.
+        # Reihenfolge daher: RapidOCR MIT provisioniertem Latin-Modell
+        # (packaging/models/manifest.json) > Tesseract(deu) > RapidOCR-
+        # Standard (Umlautreparatur uebernimmt dann das Fuzzy-Matching).
+        if cfg.rec_model_path:
+            candidates = [RapidOcrEngine(cfg), TesseractEngine(cfg)]
+        else:
+            candidates = [TesseractEngine(cfg), RapidOcrEngine(cfg)]
     for engine in candidates:
         ok, _ = engine.available()
         if ok:

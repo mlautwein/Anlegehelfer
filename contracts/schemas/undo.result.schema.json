@@ -1,0 +1,32 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "compensated_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Compensated Event Id"
+    },
+    "compensated_kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Compensated Kind"
+    }
+  },
+  "title": "UndoResult",
+  "type": "object"
+}

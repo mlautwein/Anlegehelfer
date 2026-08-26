@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from PIL import Image, ImageFilter, ImageOps
 
-MAX_SIDE = 3200
+# Spike-Ergebnis (Dev-Benchmark): Die gebuendelten RapidOCR-Mobilmodelle
+# liefern bei ~1900 px Kantenlaenge vollstaendige, sauber getrennte Zeilen;
+# groessere Bilder verschlechtern Detektion und Worttrennung.
+MAX_SIDE = 1920
 MIN_SIDE = 900
 
 

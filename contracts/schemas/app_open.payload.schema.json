@@ -1,0 +1,30 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "share_dir": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Share Dir"
+    },
+    "takeover_stale": {
+      "default": false,
+      "title": "Takeover Stale",
+      "type": "boolean"
+    },
+    "workstation": {
+      "default": "",
+      "title": "Workstation",
+      "type": "string"
+    }
+  },
+  "title": "AppOpenPayload",
+  "type": "object"
+}

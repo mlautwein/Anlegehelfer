@@ -1,0 +1,20 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "client_event_id": {
+      "title": "Client Event Id",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "client_event_id"
+  ],
+  "title": "UndoPayload",
+  "type": "object"
+}

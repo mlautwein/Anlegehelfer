@@ -1,0 +1,15 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "source_path": {
+      "title": "Source Path",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_path"
+  ],
+  "title": "ListSheetsPayload",
+  "type": "object"
+}

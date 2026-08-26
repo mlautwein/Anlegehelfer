@@ -1,0 +1,30 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "lock_released": {
+      "default": false,
+      "title": "Lock Released",
+      "type": "boolean"
+    },
+    "pending": {
+      "default": false,
+      "title": "Pending",
+      "type": "boolean"
+    },
+    "snapshot_pushed": {
+      "default": false,
+      "title": "Snapshot Pushed",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "title": "AppCloseResult",
+  "type": "object"
+}

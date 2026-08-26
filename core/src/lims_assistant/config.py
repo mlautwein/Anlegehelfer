@@ -39,7 +39,7 @@ class OcrConfig:
     # Optionale Modellpfade fuer RapidOCR (deutsches/lateinisches Rec-Modell).
     rec_model_path: str = ""
     dict_path: str = ""
-    render_dpi: int = 260
+    render_dpi: int = 170  # A4 -> ~2000 px Kantenlaenge (OCR-Spike: optimal)
     min_confidence: float = 0.55
 
 

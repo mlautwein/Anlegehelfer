@@ -1,0 +1,13 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "release_lock": {
+      "default": true,
+      "title": "Release Lock",
+      "type": "boolean"
+    }
+  },
+  "title": "AppClosePayload",
+  "type": "object"
+}

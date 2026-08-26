@@ -1,0 +1,30 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "encoding": {
+      "default": "utf8_bom",
+      "title": "Encoding",
+      "type": "string"
+    },
+    "files": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Files",
+      "type": "array"
+    },
+    "row_count": {
+      "default": 0,
+      "title": "Row Count",
+      "type": "integer"
+    },
+    "target_dir": {
+      "default": "",
+      "title": "Target Dir",
+      "type": "string"
+    }
+  },
+  "title": "ExportCsvResult",
+  "type": "object"
+}

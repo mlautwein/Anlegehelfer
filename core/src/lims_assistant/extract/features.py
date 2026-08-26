@@ -248,19 +248,24 @@ def extract_features(
             )
             _set(f, "medium", fuzzy_med or "", SRC_FUZZY)
 
-    # ---------------- Nachbereinigung
-    # "Bad WT EHM": Bad ist Ort der Entnahmestelle, nicht Raumtyp der Zeile.
-    if (
-        f.raumtyp
-        and f.raumtyp_src == SRC_DIRECT
-        and f.raumtyp == f.ort
-        and (f.wasserstelle or f.armatur)
-    ):
-        f.raumtyp = ""
-        f.raumtyp_src = SRC_NONE
+    # ---------------- Nachbereinigung: Ort vs. Raumtyp nie identisch doppelt
+    if f.ort and f.raumtyp == f.ort:
+        if f.raumtyp_src == SRC_STRUCTURE:
+            # Dedizierte Raumart-Spalte ist massgeblich; Ort waere Dopplung.
+            f.ort = ""
+            f.ort_src = SRC_NONE
+        elif f.ort in ("Bad", "WC") and (f.wasserstelle or f.armatur):
+            # Sanitaerort dominiert: "Bad, Waschbecken, Einhandmischarmatur".
+            f.raumtyp = ""
+            f.raumtyp_src = SRC_NONE
+        else:
+            # Kueche/Teekueche & Co.: Raumtyp gehoert nach Bez2, nicht in B3.
+            f.ort = ""
+            f.ort_src = SRC_NONE
 
-    # "Patientenzimmer 530": nackte Nummer neben Zimmer-Raumtyp als Raum werten.
-    if not f.raum and f.raumtyp and (
+    # "Patientenzimmer 530" (nur Freitextzeilen): nackte Nummer als Raum werten.
+    # Bei Tabellenzeilen nie - dort waere es meist die laufende Nummer.
+    if cells is None and not f.raum and f.raumtyp and (
         f.raumtyp.lower().endswith("zimmer") or f.raumtyp in vocab.RAUMTYP
     ):
         num = patterns.scan_bare_room_number(text_all)
@@ -275,5 +280,6 @@ def extract_features(
         (f.raumtyp in vocab.TECH_RAUMTYPEN and not sanitary)
         or f.pnv
         or (tech_tokens and not sanitary)
+        or (f.raumtyp in vocab.TECH_RAUMTYPEN and (f.zusatz or f.vl_rl))
     )
     return f

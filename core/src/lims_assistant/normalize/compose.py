@@ -63,7 +63,11 @@ def compose_bez1(f: RowFeatures) -> Composed:
 
 
 def compose_bez2(f: RowFeatures) -> Composed:
-    parts = [f.etage, f.raum, f.raumtyp]
+    raumtyp = f.raumtyp
+    # "Zimmer 7, Zimmer" vermeiden: generischer Raumtyp traegt nichts bei.
+    if raumtyp and f.raum and raumtyp.lower() in ("zimmer", "raum"):
+        raumtyp = ""
+    parts = [f.etage, f.raum, raumtyp]
     srcs = [f.etage_src, f.raum_src, f.raumtyp_src]
     value = join_parts(parts)
     if not value:

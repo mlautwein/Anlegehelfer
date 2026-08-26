@@ -1,0 +1,207 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "LearningHealth": {
+      "additionalProperties": false,
+      "properties": {
+        "examples_active": {
+          "default": 0,
+          "title": "Examples Active",
+          "type": "integer"
+        },
+        "row_examples_active": {
+          "default": 0,
+          "title": "Row Examples Active",
+          "type": "integer"
+        },
+        "sessions": {
+          "default": 0,
+          "title": "Sessions",
+          "type": "integer"
+        }
+      },
+      "title": "LearningHealth",
+      "type": "object"
+    },
+    "LlmHealth": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "model_path": {
+          "default": "",
+          "title": "Model Path",
+          "type": "string"
+        },
+        "model_present": {
+          "default": false,
+          "title": "Model Present",
+          "type": "boolean"
+        },
+        "model_sha256_ok": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Sha256 Ok"
+        },
+        "server_binary_present": {
+          "default": false,
+          "title": "Server Binary Present",
+          "type": "boolean"
+        }
+      },
+      "title": "LlmHealth",
+      "type": "object"
+    },
+    "LockState": {
+      "additionalProperties": false,
+      "properties": {
+        "acquired_utc": {
+          "default": "",
+          "title": "Acquired Utc",
+          "type": "string"
+        },
+        "heartbeat_utc": {
+          "default": "",
+          "title": "Heartbeat Utc",
+          "type": "string"
+        },
+        "holder_pid": {
+          "default": 0,
+          "title": "Holder Pid",
+          "type": "integer"
+        },
+        "holder_workstation": {
+          "default": "",
+          "title": "Holder Workstation",
+          "type": "string"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        },
+        "owned": {
+          "default": false,
+          "title": "Owned",
+          "type": "boolean"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        }
+      },
+      "title": "LockState",
+      "type": "object"
+    },
+    "OcrHealth": {
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "default": false,
+          "title": "Available",
+          "type": "boolean"
+        },
+        "detail": {
+          "default": "",
+          "title": "Detail",
+          "type": "string"
+        },
+        "engine": {
+          "default": "none",
+          "title": "Engine",
+          "type": "string"
+        }
+      },
+      "title": "OcrHealth",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "app_version": {
+      "title": "App Version",
+      "type": "string"
+    },
+    "data_dir": {
+      "title": "Data Dir",
+      "type": "string"
+    },
+    "db_path": {
+      "title": "Db Path",
+      "type": "string"
+    },
+    "db_schema_version": {
+      "title": "Db Schema Version",
+      "type": "integer"
+    },
+    "learning": {
+      "$ref": "#/$defs/LearningHealth"
+    },
+    "llm": {
+      "$ref": "#/$defs/LlmHealth"
+    },
+    "lock": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LockState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "ocr": {
+      "$ref": "#/$defs/OcrHealth"
+    },
+    "offline_guard": {
+      "default": false,
+      "title": "Offline Guard",
+      "type": "boolean"
+    },
+    "platform": {
+      "title": "Platform",
+      "type": "string"
+    },
+    "python_version": {
+      "title": "Python Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "app_version",
+    "schema_version",
+    "db_schema_version",
+    "python_version",
+    "platform",
+    "data_dir",
+    "db_path",
+    "ocr",
+    "llm",
+    "learning"
+  ],
+  "title": "HealthResult",
+  "type": "object"
+}

@@ -1,0 +1,61 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "SheetInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "default": 0,
+          "title": "Cols",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "rows": {
+          "default": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "visible": {
+          "default": true,
+          "title": "Visible",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "SheetInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "has_macros": {
+      "default": false,
+      "title": "Has Macros",
+      "type": "boolean"
+    },
+    "sheets": {
+      "items": {
+        "$ref": "#/$defs/SheetInfo"
+      },
+      "title": "Sheets",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "sheets"
+  ],
+  "title": "ListSheetsResult",
+  "type": "object"
+}

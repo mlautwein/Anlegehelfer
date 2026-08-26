@@ -1,0 +1,47 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "client_event_id": {
+      "title": "Client Event Id",
+      "type": "string"
+    },
+    "field": {
+      "enum": [
+        "Bez1",
+        "Bez2",
+        "B3",
+        "B4",
+        "Untersuchungsart"
+      ],
+      "title": "Field",
+      "type": "string"
+    },
+    "new_value": {
+      "default": "",
+      "title": "New Value",
+      "type": "string"
+    },
+    "old_value": {
+      "default": "",
+      "title": "Old Value",
+      "type": "string"
+    },
+    "row_id": {
+      "title": "Row Id",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "row_id",
+    "field",
+    "client_event_id"
+  ],
+  "title": "ApplyRevisionPayload",
+  "type": "object"
+}

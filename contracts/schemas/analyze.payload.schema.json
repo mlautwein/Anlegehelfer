@@ -1,0 +1,140 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "AnalyzeOptions": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty_threshold": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Certainty Threshold"
+        },
+        "llm": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "off"
+          ],
+          "title": "Llm",
+          "type": "string"
+        },
+        "ocr_engine": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "rapidocr",
+            "tesseract",
+            "none"
+          ],
+          "title": "Ocr Engine",
+          "type": "string"
+        }
+      },
+      "title": "AnalyzeOptions",
+      "type": "object"
+    },
+    "AnalyzeSource": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pages"
+        },
+        "paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Paths",
+          "type": "array"
+        },
+        "sheets": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheets"
+        },
+        "type": {
+          "enum": [
+            "pdf",
+            "image_set",
+            "excel"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "paths"
+      ],
+      "title": "AnalyzeSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "hint_text": {
+      "default": "",
+      "title": "Hint Text",
+      "type": "string"
+    },
+    "options": {
+      "$ref": "#/$defs/AnalyzeOptions"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/AnalyzeSource"
+      },
+      "minItems": 1,
+      "title": "Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "sources"
+  ],
+  "title": "AnalyzePayload",
+  "type": "object"
+}

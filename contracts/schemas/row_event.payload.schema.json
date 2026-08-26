@@ -1,0 +1,92 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "RowValues": {
+      "additionalProperties": false,
+      "properties": {
+        "B3": {
+          "default": "",
+          "title": "B3",
+          "type": "string"
+        },
+        "B4": {
+          "default": "",
+          "title": "B4",
+          "type": "string"
+        },
+        "Bez1": {
+          "default": "",
+          "title": "Bez1",
+          "type": "string"
+        },
+        "Bez2": {
+          "default": "",
+          "title": "Bez2",
+          "type": "string"
+        },
+        "Untersuchungsart": {
+          "default": "",
+          "title": "Untersuchungsart",
+          "type": "string"
+        }
+      },
+      "title": "RowValues",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "enum": [
+        "add",
+        "delete"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "client_event_id": {
+      "title": "Client Event Id",
+      "type": "string"
+    },
+    "row_id": {
+      "title": "Row Id",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "source_order": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Order"
+    },
+    "values": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RowValues"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "session_id",
+    "row_id",
+    "action",
+    "client_event_id"
+  ],
+  "title": "RowEventPayload",
+  "type": "object"
+}

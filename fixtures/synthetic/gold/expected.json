@@ -1,0 +1,162 @@
+{
+  "klinik_digital.pdf": [
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "5. OG, Zimmer 530, Patientenzimmer",
+      "B3": "Bad, Waschbecken, Einhandmischarmatur",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "5. OG, Zimmer 531, Patientenzimmer",
+      "B3": "Bad, Waschbecken, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "3. OG, Zimmer 312, Arztzimmer",
+      "B3": "Waschbecken, Zweigriffarmatur",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "2. OG, Raum 218, Teeküche",
+      "B3": "Spüle, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "EG, Raum E.08, Untersuchungsraum",
+      "B3": "Waschbecken, Thermostatarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "EG, Raum E.08, Untersuchungsraum",
+      "B3": "Waschbecken, Thermostatarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "UG, Raum U16, Technikraum",
+      "B3": "Vorlauf, PNV",
+      "B4": "Warmwasser, Speicher",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "UG, Raum U16, Technikraum",
+      "B3": "Zirkulation, PNV",
+      "B4": "Warmwasser, Zirkulation",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus A",
+      "Bez2": "UG, Raum U17, Hausanschlussraum",
+      "B3": "Entnahmeventil",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {
+        "Untersuchungsart": true
+      }
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus B",
+      "Bez2": "1. OG, Zimmer 104, Patientenzimmer",
+      "B3": "Bad, Dusche, Brausearmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus B",
+      "Bez2": "1. OG, Zimmer 105, Patientenzimmer",
+      "B3": "Bad, Waschbecken, Einhandmischarmatur",
+      "B4": "",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus B",
+      "Bez2": "EG, Küche",
+      "B3": "Spüle, Einhandmischarmatur",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Mikrobiologische Untersuchung",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus B",
+      "Bez2": "KG, Raum K2, Heizungsraum",
+      "B3": "Rücklauf, PNV",
+      "B4": "Warmwasser, Speicher",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Median Klinik Moselhoehe, Haus B",
+      "Bez2": "KG, Technikraum",
+      "B3": "DLE, Zapfstelle",
+      "B4": "Warmwasser, DLE",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {
+        "Untersuchungsart": true
+      }
+    }
+  ],
+  "seniorenresidenz_freitext.pdf": [
+    {
+      "Bez1": "Seniorenresidenz Am Kurpark, Haus 1",
+      "Bez2": "1. OG, Zimmer 101",
+      "B3": "Bad, Waschbecken, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Seniorenresidenz Am Kurpark, Haus 1",
+      "Bez2": "1. OG, Zimmer 102",
+      "B3": "Bad, Waschbecken, Einhandmischarmatur",
+      "B4": "Kaltwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Seniorenresidenz Am Kurpark, Haus 1",
+      "Bez2": "2. OG, Teeküche",
+      "B3": "Spüle, Einhandmischarmatur",
+      "B4": "Warmwasser",
+      "Untersuchungsart": "Legionellen",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Seniorenresidenz Am Kurpark, Haus 1",
+      "Bez2": "UG, Technikraum",
+      "B3": "Vorlauf, PNV",
+      "B4": "Warmwasser, Speicher",
+      "Untersuchungsart": "",
+      "uncertain": {}
+    },
+    {
+      "Bez1": "Seniorenresidenz Am Kurpark, Haus 1",
+      "Bez2": "UG, Technikraum",
+      "B3": "Rücklauf, PNV",
+      "B4": "Warmwasser, Zirkulation",
+      "Untersuchungsart": "",
+      "uncertain": {}
+    }
+  ]
+}

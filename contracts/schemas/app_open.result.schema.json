@@ -1,0 +1,90 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "LockState": {
+      "additionalProperties": false,
+      "properties": {
+        "acquired_utc": {
+          "default": "",
+          "title": "Acquired Utc",
+          "type": "string"
+        },
+        "heartbeat_utc": {
+          "default": "",
+          "title": "Heartbeat Utc",
+          "type": "string"
+        },
+        "holder_pid": {
+          "default": 0,
+          "title": "Holder Pid",
+          "type": "integer"
+        },
+        "holder_workstation": {
+          "default": "",
+          "title": "Holder Workstation",
+          "type": "string"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        },
+        "owned": {
+          "default": false,
+          "title": "Owned",
+          "type": "boolean"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        }
+      },
+      "title": "LockState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "lock": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LockState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "lock_acquired": {
+      "default": false,
+      "title": "Lock Acquired",
+      "type": "boolean"
+    },
+    "pending_pushed": {
+      "default": false,
+      "title": "Pending Pushed",
+      "type": "boolean"
+    },
+    "read_only": {
+      "default": false,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "snapshot_pulled": {
+      "default": false,
+      "title": "Snapshot Pulled",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "title": "AppOpenResult",
+  "type": "object"
+}

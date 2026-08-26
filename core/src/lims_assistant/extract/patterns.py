@@ -90,22 +90,20 @@ def etage_rank(canon: str) -> tuple[int, str]:
 
 # ------------------------------------------------------------------ Raum
 
+_NUM_PART = r"([a-zäöüß]{0,3}[-.]?\d[\w./-]*)"
+_NR_INFIX = r"(?:[\s\-.]*nr\.?)?"
 _ZIMMER_RE = re.compile(
-    _B + r"zi(?:mmer)?\.?\s*[-:]?\s*([a-zäöüß]{0,3}[-.]?\d[\w./-]*)", re.IGNORECASE
+    _B + r"zi(?:mmer)?\.?" + _NR_INFIX + r"\s*[-:]?\s*" + _NUM_PART, re.IGNORECASE
 )
 _RAUM_RE = re.compile(
-    _B + r"r(?:aum)?\.?\s*[-:]?\s*([a-zäöüß]{0,3}[-.]?\d[\w./-]*)", re.IGNORECASE
+    _B + r"r(?:aum)?\.?" + _NR_INFIX + r"\s*[-:]?\s*" + _NUM_PART, re.IGNORECASE
 )
 _NR_RE = re.compile(_B + r"nr\.?\s*[-:]?\s*(\d[\w./-]*)", re.IGNORECASE)
 
 
 def _clean_num(num: str) -> str:
-    num = num.strip(".-/ ")
-    # Buchstabenpraefixe gross (U16, A1.03)
-    m = re.match(r"([a-zäöüß]{1,3})([-.]?\d.*)", num, re.IGNORECASE)
-    if m:
-        return m.group(1).upper() + m.group(2)
-    return num
+    # Raum-/Zimmerkennungen einheitlich mit Grossbuchstaben (U16, 12A, A1.03)
+    return num.strip(".-/ ").upper()
 
 
 def scan_raum(text: str) -> tuple[str, str]:

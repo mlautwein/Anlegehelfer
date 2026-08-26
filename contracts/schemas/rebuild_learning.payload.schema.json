@@ -1,0 +1,7 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {},
+  "title": "RebuildLearningPayload",
+  "type": "object"
+}

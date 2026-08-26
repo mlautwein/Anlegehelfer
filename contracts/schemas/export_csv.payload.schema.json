@@ -1,0 +1,102 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "ExportRow": {
+      "additionalProperties": false,
+      "properties": {
+        "row_id": {
+          "default": "",
+          "title": "Row Id",
+          "type": "string"
+        },
+        "values": {
+          "$ref": "#/$defs/RowValues"
+        }
+      },
+      "title": "ExportRow",
+      "type": "object"
+    },
+    "RowValues": {
+      "additionalProperties": false,
+      "properties": {
+        "B3": {
+          "default": "",
+          "title": "B3",
+          "type": "string"
+        },
+        "B4": {
+          "default": "",
+          "title": "B4",
+          "type": "string"
+        },
+        "Bez1": {
+          "default": "",
+          "title": "Bez1",
+          "type": "string"
+        },
+        "Bez2": {
+          "default": "",
+          "title": "Bez2",
+          "type": "string"
+        },
+        "Untersuchungsart": {
+          "default": "",
+          "title": "Untersuchungsart",
+          "type": "string"
+        }
+      },
+      "title": "RowValues",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "client_event_id": {
+      "default": "",
+      "title": "Client Event Id",
+      "type": "string"
+    },
+    "encoding": {
+      "default": "utf8_bom",
+      "enum": [
+        "utf8_bom",
+        "cp1252"
+      ],
+      "title": "Encoding",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ExportRow"
+      },
+      "title": "Rows",
+      "type": "array"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "target_dir": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Dir"
+    }
+  },
+  "title": "ExportCsvPayload",
+  "type": "object"
+}

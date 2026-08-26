@@ -1,0 +1,72 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "ConfirmCell": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "enum": [
+            "Bez1",
+            "Bez2",
+            "B3",
+            "B4",
+            "Untersuchungsart"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "row_id": {
+          "title": "Row Id",
+          "type": "string"
+        },
+        "value": {
+          "default": "",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "row_id",
+        "field"
+      ],
+      "title": "ConfirmCell",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/ConfirmCell"
+      },
+      "minItems": 1,
+      "title": "Cells",
+      "type": "array"
+    },
+    "client_event_id": {
+      "title": "Client Event Id",
+      "type": "string"
+    },
+    "confirmation_type": {
+      "enum": [
+        "export",
+        "copy_column",
+        "copy_selection"
+      ],
+      "title": "Confirmation Type",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "confirmation_type",
+    "cells",
+    "client_event_id"
+  ],
+  "title": "ConfirmCellsPayload",
+  "type": "object"
+}

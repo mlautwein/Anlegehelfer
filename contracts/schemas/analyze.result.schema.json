@@ -1,0 +1,130 @@
+{
+  "$comment": "schema_version 1.0",
+  "$defs": {
+    "AnalyzeStats": {
+      "additionalProperties": false,
+      "properties": {
+        "documents": {
+          "default": 0,
+          "title": "Documents",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "default": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "fragments": {
+          "default": 0,
+          "title": "Fragments",
+          "type": "integer"
+        },
+        "llm_rows": {
+          "default": 0,
+          "title": "Llm Rows",
+          "type": "integer"
+        },
+        "ocr_pages": {
+          "default": 0,
+          "title": "Ocr Pages",
+          "type": "integer"
+        },
+        "rows": {
+          "default": 0,
+          "title": "Rows",
+          "type": "integer"
+        }
+      },
+      "title": "AnalyzeStats",
+      "type": "object"
+    },
+    "FieldValue": {
+      "additionalProperties": false,
+      "properties": {
+        "is_uncertain": {
+          "default": false,
+          "title": "Is Uncertain",
+          "type": "boolean"
+        },
+        "value": {
+          "default": "",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "title": "FieldValue",
+      "type": "object"
+    },
+    "ResultRow": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FieldValue"
+          },
+          "propertyNames": {
+            "enum": [
+              "Bez1",
+              "Bez2",
+              "B3",
+              "B4",
+              "Untersuchungsart"
+            ]
+          },
+          "title": "Fields",
+          "type": "object"
+        },
+        "row_id": {
+          "title": "Row Id",
+          "type": "string"
+        },
+        "source_order": {
+          "minimum": 0,
+          "title": "Source Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "row_id",
+        "source_order",
+        "fields"
+      ],
+      "title": "ResultRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "export_base_dir": {
+      "default": "",
+      "title": "Export Base Dir",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ResultRow"
+      },
+      "title": "Rows",
+      "type": "array"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "stats": {
+      "$ref": "#/$defs/AnalyzeStats"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "session_id"
+  ],
+  "title": "AnalyzeResult",
+  "type": "object"
+}

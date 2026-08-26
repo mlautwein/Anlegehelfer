@@ -1,0 +1,23 @@
+{
+  "$comment": "schema_version 1.0",
+  "additionalProperties": false,
+  "properties": {
+    "confirmed": {
+      "default": 0,
+      "title": "Confirmed",
+      "type": "integer"
+    },
+    "duplicates": {
+      "default": 0,
+      "title": "Duplicates",
+      "type": "integer"
+    },
+    "new_examples": {
+      "default": 0,
+      "title": "New Examples",
+      "type": "integer"
+    }
+  },
+  "title": "ConfirmCellsResult",
+  "type": "object"
+}
