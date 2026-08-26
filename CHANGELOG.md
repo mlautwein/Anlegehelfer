@@ -21,7 +21,7 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 - `docs/ERSTE_SCHRITTE.md` fuehrt linear von null bis zur ersten
   Arbeitsliste, inklusive Fehlertabelle und einem Abschnitt zum
   Ausprobieren ohne Excel auf Mac/Linux.
-- `packaging/windows/constraints-windows-x64.txt` pinnt die 49 Pakete des
+- `packaging/windows/constraints-windows-x64.txt` pinnt die 43 Pakete des
   Auslieferungsbuilds auf exakte Versionen. `build.ps1`, der Windows-CI-Job
   und der Release-Workflow loesen dagegen auf, ein CI-Schritt laesst den
   Build fehlschlagen, sobald die installierten Versionen abweichen.

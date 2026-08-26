@@ -99,7 +99,7 @@ komplette CI-Gate und baut erst danach das Paket.
 
 Der Auslieferungsbuild loest gegen
 `packaging/windows/constraints-windows-x64.txt` auf (exakte Versionen aller
-49 Pakete), damit zwei Builds zeitversetzt dieselbe EXE ergeben. Die
+43 Pakete), damit zwei Builds zeitversetzt dieselbe EXE ergeben. Die
 Testmatrix nutzt bewusst die Bereiche aus `pyproject.toml`, um Regressionen
 in neuen Bibliotheksversionen zu finden. Weichen die installierten Versionen
 von der Datei ab, schlaegt der CI-Schritt "Versionsbindung pruefen" fehl -

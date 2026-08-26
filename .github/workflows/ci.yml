@@ -88,7 +88,8 @@ jobs:
           # tr -d '\r': pip schreibt auf Windows CRLF, die Datei im Repo hat LF.
           if ! diff <(grep -vE '^#|^$' packaging/windows/constraints-windows-x64.txt | tr -d '\r' | sort -f) \
                     <(tr -d '\r' < constraints-windows-x64.txt | sort -f); then
-            echo "::warning::Versionsliste wird gerade auf die saubere Build-Umgebung umgestellt; Artefakt constraints-windows-x64 einchecken, danach wird hier wieder hart geprueft."
+            echo "::error::Installierte Versionen weichen von packaging/windows/constraints-windows-x64.txt ab. Artefakt constraints-windows-x64 herunterladen und die Datei aktualisieren."
+            exit 1
           fi
           echo "Versionsbindung ok ($(wc -l < constraints-windows-x64.txt) Pakete)"
       - name: Versionsliste als Artefakt
