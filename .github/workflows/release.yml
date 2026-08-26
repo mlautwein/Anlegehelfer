@@ -115,6 +115,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          # Landet neben der EXE - dort schaut man nach, wenn der Doppelklick
+          # scheinbar nichts tut.
+          Copy-Item packaging\windows\LIESMICH.txt dist\lims_core\LIESMICH.txt
           $distDir = (Resolve-Path "dist\lims_core").Path
           $manifest = @{}
           Get-ChildItem -Path $distDir -Recurse -File | ForEach-Object {
@@ -135,7 +138,32 @@ jobs:
           Compress-Archive -Path "dist\lims_core\*" -DestinationPath $zip -CompressionLevel Optimal
           $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
           "$hash  $(Split-Path $zip -Leaf)" | Set-Content -Encoding ASCII "$zip.sha256"
-          Write-Host "SHA-256 $hash"
+          Write-Host "SHA-256 (core) $hash"
+
+          # Zweites Archiv: alles, was zum Aufsetzen und zum Bau der
+          # Arbeitsmappe gebraucht wird. Ohne das kommt niemand ans Ziel,
+          # der nur das Release herunterlaedt statt das Repository zu holen.
+          $stage = "einrichtung"
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          New-Item -ItemType Directory -Path "$stage\excel\vba-src" -Force | Out-Null
+          New-Item -ItemType Directory -Path "$stage\docs" -Force | Out-Null
+          Copy-Item packaging\windows\einrichten.ps1        $stage
+          Copy-Item packaging\windows\build_workbook.ps1    $stage
+          Copy-Item packaging\windows\provision_offline.ps1 $stage
+          Copy-Item packaging\windows\LIESMICH.txt          $stage
+          Copy-Item excel\vba-src\*                         "$stage\excel\vba-src"
+          Copy-Item excel\workbook-template\config.beispiel.json $stage
+          foreach ($d in @("ERSTE_SCHRITTE.md", "BEDIENUNG.md", "EXCEL_SETUP.md",
+                           "WINDOWS_BUILD.md", "ABNAHME_EXCEL2016.md",
+                           "SICHERHEIT_DATENSCHUTZ.md")) {
+            Copy-Item "docs\$d" "$stage\docs"
+          }
+          $zip2 = "release\lims-probenassistent-$env:VERSION-einrichtung.zip"
+          Compress-Archive -Path "$stage\*" -DestinationPath $zip2 -CompressionLevel Optimal
+          $hash2 = (Get-FileHash -Algorithm SHA256 -Path $zip2).Hash.ToLower()
+          "$hash2  $(Split-Path $zip2 -Leaf)" | Set-Content -Encoding ASCII "$zip2.sha256"
+          Write-Host "SHA-256 (einrichtung) $hash2"
+          Remove-Item $stage -Recurse -Force
 
       - name: Releasenotizen aus CHANGELOG erzeugen
         shell: bash

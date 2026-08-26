@@ -10,6 +10,34 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ## [Unveroeffentlicht]
 
+## [0.3.0] - 2026-08-26
+
+Behebt zwei Dinge, die beim ersten Auspacken sofort aufgefallen sind: Die
+EXE wirkte beim Doppelklick tot, und die Excel-Arbeitsmappe war weder im
+Paket noch waren die Mittel dabei, sie zu bauen.
+
+### Hinzugefuegt
+
+- Das Release enthaelt ein zweites Archiv
+  `lims-probenassistent-<version>-einrichtung.zip` mit `einrichten.ps1`,
+  `build_workbook.ps1`, `provision_offline.ps1`, den VBA-Quellen der
+  Arbeitsmappe, der Beispielkonfiguration und den Anleitungen. Vorher kam
+  nur ans Ziel, wer zusaetzlich das Repository ausgecheckt hat - das
+  Release allein reichte nicht.
+- `LIESMICH.txt` liegt jetzt direkt neben `lims_core.exe` und erklaert dort,
+  warum ein Doppelklick nichts bewirkt, wo die Arbeitsmappe hingehoert und
+  wie sich der Kern per `health` pruefen laesst.
+
+### Behoben
+
+- **`lims_core.exe` schien beim Doppelklick nichts zu tun.** Ohne Kommando
+  brach argparse mit einer knappen Fehlerzeile ab; das von Windows
+  geoeffnete Konsolenfenster schloss sich sofort wieder. Der Kern erklaert
+  jetzt in klaren Worten, dass er keine eigene Oberflaeche hat, von der
+  Arbeitsmappe gesteuert wird und wie der Selbsttest geht - und haelt das
+  Fenster offen, wenn es ihm allein gehoert (Doppelklick). Aus einer
+  bereits offenen Eingabeaufforderung wird nicht gewartet.
+
 ## [0.2.0] - 2026-08-26
 
 Macht die Auslieferung tatsaechlich benutzbar: eine Einrichtung in einem
@@ -162,6 +190,7 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   sind dagegen unempfindlich; die dokumentierten Benchmarkzahlen beziehen
   sich auf den unter Linux erzeugten Korpus.
 
-[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.2.0...HEAD
+[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.1.0

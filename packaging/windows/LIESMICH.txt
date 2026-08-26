@@ -1,0 +1,59 @@
+LIMS-Probenassistent - Rechenkern (core)
+========================================
+
+Dieser Ordner enthaelt NUR den Rechenkern. Ein Doppelklick auf
+lims_core.exe oeffnet kein Fenster und bewirkt nichts Sichtbares -
+das ist Absicht und kein Fehler.
+
+Der Kern hat bewusst keine eigene Oberflaeche. Bedient wird das Werkzeug
+ueber die Excel-Arbeitsmappe
+
+    LIMS-Probenassistent.xlsm
+
+die eine Ebene HOEHER liegt, neben diesem core-Ordner:
+
+    C:\LIMS-PA\
+      LIMS-Probenassistent.xlsm     <- hiermit wird gearbeitet
+      config.json
+      core\                          <- dieser Ordner
+        lims_core.exe
+        hashes.json
+        LIESMICH.txt
+
+Die Mappe ist NICHT Teil dieses Pakets. Sie entsteht einmalig aus den
+VBA-Textmodulen und braucht dafuer Excel selbst - das laesst sich nicht
+vorab erledigen. Beides steckt im zweiten Release-Archiv:
+
+    lims-probenassistent-<version>-einrichtung.zip
+
+Darin: einrichten.ps1, build_workbook.ps1, die VBA-Quellen und die
+Anleitung ERSTE_SCHRITTE.md (Schritt 2 beschreibt den Weg mit Excel,
+alternativ von Hand in etwa fuenf Minuten).
+
+
+Pruefen, ob der Kern laeuft
+---------------------------
+
+Eingabeaufforderung in diesem Ordner oeffnen (Shift + Rechtsklick >
+"PowerShell-Fenster hier oeffnen") und eingeben:
+
+    .\lims_core.exe health
+
+Es erscheint eine JSON-Selbstauskunft mit Version, OCR-Engine und
+Verzeichnissen. Kommt "ok": true, ist alles in Ordnung.
+
+    .\lims_core.exe --version     nur die Versionsnummer
+    .\lims_core.exe --help        alle Kommandos
+
+
+Hinweise
+--------
+
+- Der Betrieb ist vollstaendig offline. Ein Waechter blockiert zur
+  Laufzeit jeden Netzwerkzugriff ausser Loopback.
+- hashes.json listet die SHA-256-Summen aller Dateien dieses Ordners.
+  einrichten.ps1 prueft sie beim Aufsetzen.
+- Fuer deutsche Umlaute in gescannten Vorlagen sollte das Latin-OCR-Modell
+  nachgeruestet werden (provision_offline.ps1 -Step model). Ohne das
+  arbeitet die OCR mit den mitgelieferten Standardmodellen; betroffene
+  Werte werden gelb markiert.

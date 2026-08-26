@@ -162,7 +162,66 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _eigenes_konsolenfenster() -> bool:
+    """Wahr, wenn das Konsolenfenster nur zu diesem Prozess gehoert.
+
+    Beim Doppelklick im Explorer legt Windows ein eigenes Fenster an, das
+    mit dem Programmende sofort verschwindet - jede Meldung waere dann
+    unlesbar. Aus einer bereits offenen Eingabeaufforderung heraus haengen
+    mindestens zwei Prozesse am Fenster, dort wird nicht gewartet.
+    """
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+
+        puffer = (ctypes.c_uint * 2)()
+        anzahl = ctypes.windll.kernel32.GetConsoleProcessList(puffer, 2)
+        return anzahl <= 1
+    except Exception:  # noqa: BLE001 - reine Komfortfunktion
+        return False
+
+
+_OHNE_ARGUMENTE = """
+LIMS-Probenassistent - Rechenkern {version}
+
+Dieses Programm hat bewusst keine eigene Oberflaeche. Es wird von der
+Arbeitsmappe LIMS-Probenassistent.xlsm gesteuert und nimmt Auftraege als
+JSON-Dateien entgegen. Ein Doppelklick bewirkt deshalb nichts Sichtbares -
+das ist kein Fehler.
+
+So arbeitest du mit dem Werkzeug:
+
+  1. LIMS-Probenassistent.xlsm im selben Ordner oeffnen (Makros zulassen).
+     Fehlt die Mappe, muss sie einmalig erzeugt werden - siehe
+     docs/ERSTE_SCHRITTE.md, Schritt 2. Dafuer wird Excel gebraucht.
+  2. Im Blatt "Assistent": Dateien waehlen, dann Analyse starten.
+
+Selbsttest auf der Kommandozeile (Eingabeaufforderung im Ordner oeffnen):
+
+  lims_core.exe health          Selbstauskunft: Version, OCR, Verzeichnisse
+  lims_core.exe --version       nur die Versionsnummer
+  lims_core.exe --help          alle Kommandos
+
+Anleitung: docs/ERSTE_SCHRITTE.md   Bedienung: docs/BEDIENUNG.md
+"""
+
+
+def _hinweis_ohne_argumente() -> int:
+    print(_OHNE_ARGUMENTE.format(version=APP_VERSION))
+    if _eigenes_konsolenfenster():
+        try:
+            input("Zum Schliessen die Eingabetaste druecken ... ")
+        except (EOFError, KeyboardInterrupt):
+            pass
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
+    # Ohne Kommando wuerde argparse nur eine knappe Fehlerzeile ausgeben und
+    # das beim Doppelklick geoeffnete Fenster sofort wieder schliessen.
+    if not (sys.argv[1:] if argv is None else argv):
+        return _hinweis_ohne_argumente()
     args = build_parser().parse_args(argv)
     settings = load_settings(args.config)
     _install_guard(settings)

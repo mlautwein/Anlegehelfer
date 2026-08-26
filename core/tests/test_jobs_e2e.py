@@ -170,3 +170,19 @@ def test_keine_originaldateien_im_datenverzeichnis(tmp_path, fixtures_dir):
         if p.is_file() and p.suffix.lower() in suffixes
     ]
     assert offenders == [], f"Originaldateien im Datenverzeichnis: {offenders}"
+
+
+def test_start_ohne_kommando_erklaert_sich(tmp_path):
+    """Ein Doppelklick auf die EXE muss eine verstaendliche Antwort geben.
+
+    Frueher brach argparse mit einer knappen Fehlerzeile ab; das beim
+    Doppelklick geoeffnete Konsolenfenster schloss sich sofort wieder und
+    der Eindruck war "es passiert nichts".
+    """
+    proc = _run_cli([], tmp_path / "daten")
+    assert proc.returncode == 2  # kein Erfolg, aber auch kein Absturz
+    text = proc.stdout + proc.stderr
+    assert "LIMS-Probenassistent" in text
+    assert "keine eigene Oberflaeche" in text
+    assert "LIMS-Probenassistent.xlsm" in text
+    assert "health" in text

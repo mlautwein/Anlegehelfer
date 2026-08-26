@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lims-assistant-core"
-version = "0.2.0"
+version = "0.3.0"
 description = "Lokaler LIMS-Probenassistent - portabler Offline-Rechenkern (Import, OCR, Normalisierung, Lernen, Export)"
 readme = "README.md"
 requires-python = ">=3.11"

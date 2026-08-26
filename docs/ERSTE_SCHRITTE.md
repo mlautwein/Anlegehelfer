@@ -19,28 +19,35 @@ Betrieb danach: `docs/BEDIENUNG.md`.
 
 ## Schritt 1: Paket einrichten
 
-Repository holen (oder als ZIP herunterladen und entpacken), dann:
+Von der [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases)
+das Archiv **`lims-probenassistent-<version>-einrichtung.zip`** laden und
+entpacken. Darin liegen die Skripte, die VBA-Quellen der Arbeitsmappe und
+diese Anleitung. Dann im entpackten Ordner:
 
-    powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel "C:\LIMS-PA"
+    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA"
 
-Das Skript laedt das aktuelle Release, prueft die SHA-256-Pruefsumme,
-entpackt nach `C:\LIMS-PA\core\`, gleicht jede Datei gegen das mitgelieferte
-Hash-Manifest ab, schreibt eine passende `config.json` und faehrt einen
-Selbsttest. Am Ende steht, was noch fehlt.
+Das Skript laedt den Rechenkern aus demselben Release, prueft die
+SHA-256-Pruefsumme, entpackt nach `C:\LIMS-PA\core\`, gleicht jede Datei
+gegen das mitgelieferte Hash-Manifest ab, schreibt eine passende
+`config.json` und faehrt einen Selbsttest. Am Ende steht, was noch fehlt.
 
-Kein Internet am Zielrechner? Das ZIP samt `.sha256` vorab von der
-[Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases) laden
-und mitgeben:
+Kein Internet am Zielrechner? Dann zusaetzlich
+`lims_core-<version>-windows-x64.zip` samt `.sha256` vorab laden und
+mitgeben:
 
-    powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.2.0-windows-x64.zip"
+    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.3.0-windows-x64.zip"
+
+> Wer das Repository ohnehin ausgecheckt hat, findet dasselbe Skript unter
+> `packaging\windows\einrichten.ps1`.
 
 ## Schritt 2: Excel-Mappe erzeugen
 
-Die XLSM ist bewusst kein Repository-Inhalt, sondern entsteht aus den
-VBA-Textmodulen unter `excel\vba-src\`. Sie laesst sich nur mit Excel selbst
+Die XLSM ist bewusst kein fertiges Auslieferungsstueck, sondern entsteht
+aus den VBA-Textmodulen unter `excel\vba-src\` (im entpackten
+Einrichtungsarchiv). Sie laesst sich nur mit Excel selbst
 bauen - dieser Schritt ist deshalb nicht automatisierbar.
 
-    powershell -ExecutionPolicy Bypass -File packaging\windows\build_workbook.ps1
+    powershell -ExecutionPolicy Bypass -File build_workbook.ps1
 
 Dafuer muss einmalig **Datei > Optionen > Trust Center > Einstellungen fuer
 das Trust Center > Makroeinstellungen > "Zugriff auf das
@@ -59,6 +66,7 @@ Ordner sieht dann so aus:
       core\
         lims_core.exe
         hashes.json
+        LIESMICH.txt
 
 ## Schritt 3: Deutsche Umlaute in Scans (empfohlen)
 
@@ -67,7 +75,7 @@ Die verlieren deutsche Umlaute - aus "Teekueche" wird "Teekuche". Die
 Fuzzy-Reparatur faengt das ab und markiert die Werte **gelb**, aber sauberer
 ist das Latin-Modell:
 
-    powershell -ExecutionPolicy Bypass -File packaging\windows\provision_offline.ps1 -Step model
+    powershell -ExecutionPolicy Bypass -File provision_offline.ps1 -Step model
 
 Danach die berechnete SHA-256 in `packaging\models\manifest.json` eintragen.
 
@@ -98,6 +106,8 @@ Ab hier: `docs/BEDIENUNG.md`.
 
 | Symptom | Ursache und Abhilfe |
 |---|---|
+| Doppelklick auf `lims_core.exe` bewirkt nichts | Richtig so - der Kern hat keine eigene Oberflaeche und wird von der Arbeitsmappe gesteuert. Er zeigt beim Start ohne Kommando einen Hinweistext. Zum Pruefen: `lims_core.exe health` in einer Eingabeaufforderung. Siehe auch `core\LIESMICH.txt`. |
+| Es ist keine Excel-Mappe im Paket | Richtig - sie entsteht einmalig aus den VBA-Quellen und braucht dafuer Excel selbst (Schritt 2). |
 | `einrichten.ps1` meldet "core\ existiert bereits" | Absicht, damit nichts unbemerkt ueberschrieben wird. Mit `-Ueberschreiben` erneut aufrufen. |
 | "SHA-256 stimmt nicht" | Uebertragung unvollstaendig oder Paket manipuliert. Neu laden, **nicht** verwenden. |
 | Selbsttest meldet "OCR steht NICHT zur Verfuegung" | Paket unvollstaendig entpackt. Schritt 1 mit `-Ueberschreiben` wiederholen. |
