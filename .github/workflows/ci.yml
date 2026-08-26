@@ -69,6 +69,18 @@ jobs:
           pip install -e ".[dev]"
           pip install -e ".[ocr]"
           pip install pyinstaller
+      - name: Aufgeloeste Versionen festhalten (Build-Reproduzierbarkeit)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip freeze --exclude-editable > constraints-windows-x64.txt
+          echo "$(wc -l < constraints-windows-x64.txt) Pakete festgehalten"
+      - name: Versionsliste als Artefakt
+        uses: actions/upload-artifact@v7
+        with:
+          name: constraints-windows-x64
+          path: constraints-windows-x64.txt
+          retention-days: 14
       - name: Fixtures erzeugen
         run: python scripts/make_fixtures.py
       - name: Tests auf Windows
