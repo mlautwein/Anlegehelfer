@@ -66,20 +66,18 @@ Rechenkern aus dem aktuellen Release nach.
 **Nur noetig, wenn `Installieren.cmd` die Mappe als offenen Punkt gemeldet
 hat.** Im Normalfall ist sie bereits erzeugt.
 
-Die XLSM ist bewusst kein fertiges Auslieferungsstueck, sondern entsteht
-aus den VBA-Textmodulen unter `excel\vba-src\`. Sie laesst sich nur mit
-Excel selbst bauen - deshalb kann sie nicht vorgefertigt mitgeliefert
-werden.
+Die XLSM ist kein fertiges Auslieferungsstueck, sondern entsteht aus den
+VBA-Textmodulen unter `excel\vba-src\`. Bauen laesst sie sich nur mit Excel
+selbst - deshalb kann sie nicht vorgefertigt beiliegen.
 
-Der haeufigste Grund fuer das Scheitern ist ein fehlender Haken in Excel:
+Der dafuer noetige Schalter *"Zugriff auf das VBA-Projektobjektmodell
+vertrauen"* wird von `build_workbook.ps1` **automatisch gesetzt und
+unmittelbar danach auf den vorherigen Wert zurueckgenommen** - auch wenn
+der Bau dazwischen scheitert. Er liegt unter `HKCU`, es braucht also keine
+Administratorrechte. Wer das nicht will: `-KeinTrustCenterEingriff`.
 
-> **Datei > Optionen > Trust Center > Einstellungen fuer das Trust Center >
-> Makroeinstellungen > "Zugriff auf das VBA-Projektobjektmodell vertrauen"**
-
-Haken setzen, `Installieren.cmd` erneut doppelklicken - danach kann der
-Haken wieder weg.
-
-Ohne Aenderung am Trust Center geht es auch von Hand in etwa fuenf Minuten:
+Scheitert es trotzdem, sperrt den Schalter in aller Regel eine
+Gruppenrichtlinie. Dann bleibt der manuelle Weg, etwa fuenf Minuten:
 `docs/EXCEL_SETUP.md`, **Weg B** - elf Module importieren,
 `modSetup.EnsureUi` ausfuehren, fertig. Die erzeugte
 `LIMS-Probenassistent.xlsm` gehoert dann in den Arbeitsordner:
@@ -91,6 +89,13 @@ Ohne Aenderung am Trust Center geht es auch von Hand in etwa fuenf Minuten:
         lims_core.exe
         hashes.json
         LIESMICH.txt
+
+## Aktualisieren
+
+Neues Setup-Archiv entpacken und `Installieren.cmd` doppelklicken. Der
+Rechenkern wird ersetzt, `config.json` und die gelernten Daten bleiben
+unangetastet. Eine Konfiguration laesst sich mit `-ConfigNeuSchreiben`
+bewusst erneuern.
 
 ## Schritt 3: Deutsche Umlaute in Scans (empfohlen)
 
@@ -135,9 +140,9 @@ Ab hier: `docs/BEDIENUNG.md`.
 | Windows warnt beim Start von `Installieren.cmd` | *Weitere Informationen* > *Trotzdem ausfuehren*. Die Datei ist nicht signiert. |
 | Doppelklick auf `lims_core.exe` bewirkt nichts | Richtig so - der Kern hat keine eigene Oberflaeche und wird von der Arbeitsmappe gesteuert. Er zeigt beim Start ohne Kommando einen Hinweistext. Zum Pruefen: `lims_core.exe health` in einer Eingabeaufforderung. Siehe auch `core\LIESMICH.txt`. |
 | Es ist keine Excel-Mappe im Paket | Richtig - `Installieren.cmd` erzeugt sie beim Einrichten. Klappt das nicht, meldet es das als offenen Punkt (Schritt 2). |
-| `einrichten.ps1` meldet "core\ existiert bereits" | Absicht, damit nichts unbemerkt ueberschrieben wird. Mit `-Ueberschreiben` erneut aufrufen. |
+| Bereits installiert, was passiert beim erneuten Ausfuehren? | Der Rechenkern wird aktualisiert; `config.json` und die gelernten Daten bleiben. Siehe "Aktualisieren". |
 | "SHA-256 stimmt nicht" | Uebertragung unvollstaendig oder Paket manipuliert. Neu laden, **nicht** verwenden. |
-| Selbsttest meldet "OCR steht NICHT zur Verfuegung" | Paket unvollstaendig entpackt. Schritt 1 mit `-Ueberschreiben` wiederholen. |
+| Selbsttest meldet "OCR steht NICHT zur Verfuegung" | Archiv unvollstaendig entpackt. Neu entpacken und `Installieren.cmd` erneut ausfuehren. |
 | Mappe startet nur lesend | Jemand anderes hat den Schreibzugriff; der Name steht oben im Blatt `Assistent`. Nach einem Absturz wird der alte Lock nach Rueckfrage uebernommen. |
 | Scans liefern keine oder wirre Zeilen | Meist Aufloesung. Als PDF mit mindestens 300 dpi scannen statt abfotografieren. |
 | Umlaute fehlerhaft, Zellen gelb | Latin-Modell fehlt - Schritt 3. |

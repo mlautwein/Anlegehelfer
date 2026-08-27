@@ -17,7 +17,11 @@ param(
     # Ordner mit den VBA-Textmodulen. Ohne Angabe wird gesucht.
     [string]$VbaDir = "",
     # Zieldatei. Ohne Angabe: dist\LIMS-Probenassistent.xlsm neben dem Skript.
-    [string]$Ziel = ""
+    [string]$Ziel = "",
+
+    # Den Trust-Center-Schalter nicht anfassen (dann muss der Haken von Hand
+    # gesetzt sein, sonst schlaegt der Bau fehl).
+    [switch]$KeinTrustCenterEingriff
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,6 +52,55 @@ if ($Ziel) {
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 Write-Host ("VBA-Quellen: {0}" -f $VbaDir)
 
+# ---------------------------------------------------------------------
+# Trust-Center-Haken vorruebergehend setzen
+#
+# Die COM-Automation des VBA-Projekts ist standardmaessig gesperrt; ohne
+# den Haken "Zugriff auf das VBA-Projektobjektmodell vertrauen" schlaegt
+# der Bau fehl. Das ist der mit Abstand haeufigste Stolperstein bei der
+# Installation. Der Schalter liegt in HKCU - also KEINE Administratorrechte
+# noetig - und wird unten in jedem Fall auf den vorherigen Wert
+# zurueckgesetzt, auch wenn der Bau scheitert. Excel liest ihn beim Start,
+# deshalb muss das vor dem Erzeugen der Excel-Instanz geschehen.
+# ---------------------------------------------------------------------
+$gesetzteSchluessel = @()
+if (-not $KeinTrustCenterEingriff) {
+    foreach ($ver in @("16.0", "15.0", "14.0")) {
+        $pfad = "HKCU:\Software\Microsoft\Office\$ver\Excel\Security"
+        # Nur fuer tatsaechlich installierte Excel-Versionen.
+        if (-not (Test-Path "HKCU:\Software\Microsoft\Office\$ver\Excel")) { continue }
+        try {
+            if (-not (Test-Path $pfad)) { New-Item -Path $pfad -Force | Out-Null }
+            $alt = (Get-ItemProperty -Path $pfad -Name AccessVBOM -ErrorAction SilentlyContinue).AccessVBOM
+            if ($alt -ne 1) {
+                Set-ItemProperty -Path $pfad -Name AccessVBOM -Value 1 -Type DWord
+                $gesetzteSchluessel += [pscustomobject]@{ Pfad = $pfad; Alt = $alt }
+                Write-Host ("Trust Center fuer Excel {0} voruebergehend geoeffnet" -f $ver) -ForegroundColor Yellow
+            }
+        } catch {
+            Write-Host ("Trust-Center-Schalter fuer {0} nicht setzbar: {1}" -f $ver, $_.Exception.Message) -ForegroundColor Yellow
+        }
+    }
+}
+
+function Restore-TrustCenter {
+    foreach ($e in $script:gesetzteSchluessel) {
+        try {
+            if ($null -eq $e.Alt) {
+                Remove-ItemProperty -Path $e.Pfad -Name AccessVBOM -ErrorAction SilentlyContinue
+            } else {
+                Set-ItemProperty -Path $e.Pfad -Name AccessVBOM -Value $e.Alt -Type DWord
+            }
+        } catch {
+            Write-Host ("Achtung: Trust-Center-Schalter unter {0} konnte nicht zurueckgesetzt werden." -f $e.Pfad) -ForegroundColor Red
+        }
+    }
+    if ($script:gesetzteSchluessel.Count -gt 0) {
+        Write-Host "Trust Center wieder auf den vorherigen Stand gesetzt." -ForegroundColor Green
+        $script:gesetzteSchluessel = @()
+    }
+}
+
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
 $excel.DisplayAlerts = $false
@@ -58,9 +111,10 @@ try {
     try {
         $null = $wb.VBProject.Name
     } catch {
-        throw ("Kein Zugriff auf das VBA-Projekt. Bitte in Excel aktivieren: " +
-            "Trust Center -> 'Zugriff auf das VBA-Projektobjektmodell vertrauen'. " +
-            "Alternative: manueller Import laut docs/EXCEL_SETUP.md")
+        throw ("Kein Zugriff auf das VBA-Projekt, obwohl der Trust-Center-" +
+            "Schalter gesetzt wurde. Moeglich ist eine Gruppenrichtlinie, die " +
+            "ihn erzwingt. Dann hilft nur der manuelle Import laut " +
+            "docs/EXCEL_SETUP.md (Weg B, ca. 5 Minuten).")
     }
 
     # 1) Standardmodule importieren
@@ -110,4 +164,6 @@ try {
     if ($wb) { $wb.Close($false) }
     $excel.Quit()
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+    # Muss auch dann laufen, wenn der Bau oben gescheitert ist.
+    Restore-TrustCenter
 }

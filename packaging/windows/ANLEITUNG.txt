@@ -49,15 +49,11 @@ Wenn etwas nicht klappt
 -----------------------
 
 "Es fehlt noch die Arbeitsmappe"
-  Die Excel-Datei konnte nicht automatisch erzeugt werden. Fast immer
-  fehlt dafuer in Excel ein Haken:
-
-    Datei > Optionen > Trust Center > Einstellungen fuer das
-    Trust Center > Makroeinstellungen >
-    [x] Zugriff auf das VBA-Projektobjektmodell vertrauen
-
-  Haken setzen, Excel schliessen, Installieren.cmd noch einmal
-  doppelklicken. Danach kann der Haken wieder weg.
+  Die Excel-Datei konnte nicht erzeugt werden. Die Installation setzt den
+  dafuer noetigen Excel-Schalter normalerweise selbst und nimmt ihn danach
+  wieder zurueck. Klappt das nicht, sperrt ihn meist eine Vorgabe der
+  IT-Abteilung. Dann hilft der Weg von Hand, er dauert etwa fuenf Minuten
+  und steht in docs\EXCEL_SETUP.md unter "Weg B".
 
 Doppelklick auf lims_core.exe bewirkt nichts
   Das ist richtig so. Diese Datei ist der Rechenteil ohne eigenes
@@ -81,3 +77,10 @@ Gut zu wissen
 - Eingelesene Dokumente werden nicht dauerhaft kopiert.
 - Das Werkzeug ist eine Hilfe beim Abtippen, keine Freigabe. Verbindlich
   sind die Daten erst, wenn sie geprueft im LIMS stehen.
+- Waehrend der Installation wird ein Excel-Schalter kurz umgelegt
+  ("Zugriff auf das VBA-Projektobjektmodell"), damit die Arbeitsmappe
+  gebaut werden kann. Er wird sofort danach auf den vorherigen Stand
+  zurueckgesetzt - auch dann, wenn dabei etwas schiefgeht.
+- Eine spaetere Version installiert man genauso: Archiv entpacken,
+  Installieren.cmd doppelklicken. Einstellungen und Gelerntes bleiben
+  erhalten, erneuert wird nur der Rechenteil.

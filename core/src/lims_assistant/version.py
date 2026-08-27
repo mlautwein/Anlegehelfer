@@ -1,6 +1,6 @@
 """Zentrale Versionskonstanten."""
 
-APP_VERSION = "0.5.0"
+APP_VERSION = "0.6.0"
 
 # Version der JSON-Jobvertraege (request/progress/response).
 SCHEMA_VERSION = "1.0"

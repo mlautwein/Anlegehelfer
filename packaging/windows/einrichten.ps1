@@ -35,7 +35,10 @@ param(
     [switch]$Ueberschreiben,
 
     # Arbeitsmappe nicht bauen (z. B. auf Rechnern ohne Excel).
-    [switch]$OhneMappe
+    [switch]$OhneMappe,
+
+    # Vorhandene config.json verwerfen und neu schreiben.
+    [switch]$ConfigNeuSchreiben
 )
 
 $ErrorActionPreference = "Stop"
@@ -80,11 +83,9 @@ if (-not (Test-Path $Ziel)) {
 $coreDir = Join-Path $Ziel "core"
 if ((Test-Path $coreDir) -and -not $Ueberschreiben) {
     if ($Interaktiv) {
-        $antwort = Read-Host "In diesem Ordner ist bereits eine Einrichtung. Ueberschreiben? [j/N]"
-        if ($antwort -notmatch '^[jJyY]') {
-            Write-Host "Abgebrochen - es wurde nichts veraendert."
-            exit 0
-        }
+        # Aktualisieren ist der Normalfall - config.json und die gelernten
+        # Daten bleiben dabei ohnehin erhalten, erneuert wird nur core\.
+        Gut "bereits eingerichtet - Rechenkern wird aktualisiert"
         $Ueberschreiben = $true
     } else {
         throw "core\ existiert bereits in '$Ziel'. Mit -Ueberschreiben erneut einrichten."
@@ -96,6 +97,7 @@ Schritt "2/7 Paket bereitstellen"
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("lims-setup-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 $pruefsummenDatei = ""
+$nachPruefung = $false
 try {
     $mitgeliefert = Join-Path $PSScriptRoot "core\lims_core.exe"
     if (-not $Paket -and (Test-Path $mitgeliefert)) {
@@ -124,18 +126,21 @@ try {
         if (-not $meta) { throw "Kein Release gefunden (Repository privat oder Tag falsch?)." }
         Gut "Release: $($meta.tag_name)"
 
-        $asset = $meta.assets | Where-Object { $_.name -like "lims_core-*-windows-x64.zip" } | Select-Object -First 1
-        $assetHash = $meta.assets | Where-Object { $_.name -like "lims_core-*.zip.sha256" } | Select-Object -First 1
-        if (-not $asset) { throw "Im Release $($meta.tag_name) liegt kein Windows-Paket." }
+        $asset = $meta.assets | Where-Object { $_.name -like "*Setup-Windows.zip" } | Select-Object -First 1
+        $assetHash = $meta.assets | Where-Object { $_.name -like "*Setup-Windows.zip.sha256" } | Select-Object -First 1
+        if (-not $asset) { throw "Im Release $($meta.tag_name) liegt kein Setup-Archiv." }
 
         $zip = Join-Path $tempDir $asset.name
         Gut "lade $($asset.name) ($([math]::Round($asset.size / 1MB)) MB) ..."
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
-        $pruefsummenDatei = ""
         if ($assetHash) {
             $pruefsummenDatei = Join-Path $tempDir $assetHash.name
             Invoke-WebRequest -Uri $assetHash.browser_download_url -OutFile $pruefsummenDatei
         }
+        # Im Setup-Archiv steckt der Rechenkern in core\ - nach der
+        # Pruefsummenkontrolle weiter unten wird daraus $quellOrdner.
+        $entpackt = Join-Path $tempDir "entpackt"
+        $nachPruefung = $true
     }
 
     # -----------------------------------------------------------------
@@ -155,6 +160,13 @@ try {
 
     # -----------------------------------------------------------------
     Schritt "4/7 Rechenkern bereitstellen"
+    if ($nachPruefung) {
+        Expand-Archive -Path $zip -DestinationPath $entpackt -Force
+        $quellOrdner = Join-Path $entpackt "core"
+        if (-not (Test-Path (Join-Path $quellOrdner "lims_core.exe"))) {
+            throw "Im Setup-Archiv fehlt core\lims_core.exe."
+        }
+    }
     if (Test-Path $coreDir) { Remove-Item $coreDir -Recurse -Force }
     if ($quellOrdner) {
         Copy-Item -Path $quellOrdner -Destination $coreDir -Recurse -Force
@@ -188,8 +200,12 @@ try {
 # ---------------------------------------------------------------------
 Schritt "5/7 config.json"
 $configPfad = Join-Path $Ziel "config.json"
-if ((Test-Path $configPfad) -and -not $Ueberschreiben) {
-    Gut "vorhanden, bleibt unveraendert"
+# Bewusst auch bei -Ueberschreiben stehenlassen: Bei einer Aktualisierung
+# soll eine angepasste Konfiguration (z. B. ein gemeinsamer Ordner) nicht
+# stillschweigend verlorengehen. Erzwingen laesst sich das mit
+# -ConfigNeuSchreiben.
+if ((Test-Path $configPfad) -and -not $ConfigNeuSchreiben) {
+    Gut "vorhanden, bleibt unveraendert (mit -ConfigNeuSchreiben erneuern)"
 } else {
     $config = [ordered]@{
         '$comment'               = "Erzeugt von einrichten.ps1. ocr.rec_model_path zeigt auf das Latin-Modell; solange es fehlt, arbeitet die OCR mit den gebuendelten Standardmodellen (deutsche Umlaute werden dann per Fuzzy repariert und gelb markiert). Nachruesten: provision_offline.ps1 -Step model"
@@ -266,10 +282,10 @@ if ($OhneMappe) {
         } catch {
             Warnung "Die Mappe konnte nicht automatisch erzeugt werden:"
             Warnung "  $($_.Exception.Message)"
-            Warnung "Meist fehlt in Excel der Haken 'Zugriff auf das VBA-Projekt-"
-            Warnung "objektmodell vertrauen' (Datei > Optionen > Trust Center >"
-            Warnung "Einstellungen fuer das Trust Center > Makroeinstellungen)."
-            $offenePunkte.Add("Arbeitsmappe erzeugen - Trust-Center-Haken setzen und Installieren.cmd erneut starten, oder von Hand nach docs\EXCEL_SETUP.md (Weg B, ca. 5 Minuten)")
+            Warnung "Der noetige Trust-Center-Schalter wird eigentlich automatisch"
+            Warnung "gesetzt und danach zurueckgenommen. Schlaegt das fehl, sperrt"
+            Warnung "ihn meist eine Gruppenrichtlinie der IT."
+            $offenePunkte.Add("Arbeitsmappe von Hand erzeugen: docs\EXCEL_SETUP.md, Weg B (ca. 5 Minuten)")
         }
     }
 }

@@ -10,6 +10,41 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ## [Unveroeffentlicht]
 
+## [0.6.0] - 2026-08-26
+
+Nimmt die letzte Huerde aus der Installation und macht das Aktualisieren
+gefahrlos.
+
+### Hinzugefuegt
+
+- `build_workbook.ps1` setzt den Excel-Schalter *"Zugriff auf das
+  VBA-Projektobjektmodell vertrauen"* **selbst** und nimmt ihn im
+  `finally`-Zweig wieder auf den vorherigen Wert zurueck - auch wenn der
+  Bau dazwischen scheitert. Bisher war der fehlende Haken der mit Abstand
+  haeufigste Grund, warum die Arbeitsmappe nicht entstand, und Anwender
+  mussten ihn von Hand im Trust Center suchen. Der Wert liegt unter `HKCU`,
+  Administratorrechte sind also nicht noetig; gesetzt wird nur fuer
+  tatsaechlich installierte Excel-Versionen (16.0/15.0/14.0). Abschaltbar
+  mit `-KeinTrustCenterEingriff`.
+
+### Geaendert
+
+- **Aktualisieren laeuft ohne Rueckfrage durch.** Ist bereits installiert,
+  wird der Rechenkern ersetzt, statt mit "core\ existiert bereits"
+  abzubrechen.
+- **`config.json` bleibt bei einer Aktualisierung erhalten**, auch mit
+  `-Ueberschreiben`. Vorher haette eine angepasste Konfiguration - etwa ein
+  gemeinsamer Ordner - stillschweigend ueberschrieben werden koennen.
+  Erneuern jetzt ausdruecklich mit `-ConfigNeuSchreiben`.
+
+### Behoben
+
+- Der Download-Rueckfall von `einrichten.ps1` suchte im Release noch nach
+  `lims_core-*-windows-x64.zip`. Dieses Archiv gibt es seit 0.5.0 nicht
+  mehr; wer das Skript aus einem Repository-Auscheckvorgang heraus ohne
+  danebenliegendes `core\` aufrief, bekam "kein Windows-Paket". Es holt
+  jetzt das Setup-Archiv und entnimmt ihm den Rechenkern.
+
 ## [0.5.0] - 2026-08-26
 
 Auslieferung fuer Laien: ein Archiv, ein Doppelklick, keine Rueckfrage,
@@ -248,7 +283,8 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   sind dagegen unempfindlich; die dokumentierten Benchmarkzahlen beziehen
   sich auf den unter Linux erzeugten Korpus.
 
-[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.5.0...HEAD
+[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.6.0
 [0.5.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.3.0
