@@ -9,52 +9,57 @@ Betrieb danach: `docs/BEDIENUNG.md`.
   x64). Der Rechner braucht kein Python.
 - Einen Ordner, in dem gearbeitet wird - lokal oder auf einer Freigabe.
   Vorschlag der Installation: `C:\LIMS-Probenassistent`.
-- Einmalig Internet fuer die Installation (und fuer Schritt 3). Der spaetere Betrieb ist
-  vollstaendig offline; ein Waechter blockiert zur Laufzeit jeden
-  Netzwerkzugriff ausser Loopback.
+- Kein Internet noetig - ausser einmalig fuer Schritt 3 (bessere Umlaute in
+  Scans). Auch der Betrieb ist vollstaendig offline; ein Waechter blockiert
+  zur Laufzeit jeden Netzwerkzugriff ausser Loopback.
 
 > **Auf einem Mac oder unter Linux** laeuft nur der Rechenkern, nicht die
 > Excel-Oberflaeche (sie benutzt Win32-Clipboard und `OnTime`). Zum
 > Ausprobieren: siehe "Ohne Excel ausprobieren" ganz unten.
 
-## Installation: zwei Klicks
+## Installation
 
 1. Von der [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases)
-   das Archiv **`lims-probenassistent-<version>-einrichtung.zip`**
+   die Datei **`LIMS-Probenassistent-<version>-Setup-Windows.zip`**
    herunterladen und entpacken (Rechtsklick > "Alle extrahieren").
 2. Im entpackten Ordner **`Installieren.cmd`** doppelklicken.
 
-Mehr ist nicht noetig. Windows meldet unter Umstaenden "Der Computer wurde
-durch Windows geschuetzt" - dann auf *Weitere Informationen* > *Trotzdem
-ausfuehren* klicken (die Datei stammt aus dem Internet und ist nicht
-signiert).
+Das ist alles. Es gibt nur dieses eine Archiv, der Rechenkern liegt darin -
+waehrend der Installation wird nichts nachgeladen, sie funktioniert also
+auch ohne Internet und in abgeschotteten Netzen.
 
-Das Skript fragt nur nach dem Arbeitsordner - Eingabetaste uebernimmt den
-Vorschlag `C:\LIMS-Probenassistent`. Danach laeuft alles allein:
+Windows meldet unter Umstaenden "Der Computer wurde durch Windows
+geschuetzt" - dann *Weitere Informationen* > *Trotzdem ausfuehren*. Die
+Datei ist nicht signiert; das ist der einzige Grund fuer die Meldung.
 
-- Rechenkern aus demselben Release laden, SHA-256 und Hash-Manifest pruefen
-- nach `core\` entpacken und `config.json` schreiben
-- **Arbeitsmappe mit Excel erzeugen** und in den Ordner legen
+Es wird nichts gefragt. Installiert wird nach `C:\LIMS-Probenassistent`;
+ist der Pfad gesperrt, weicht die Installation selbsttaetig in den
+Benutzerordner aus. Der Ablauf:
+
+- Rechenkern in den Zielordner kopieren und gegen das Hash-Manifest pruefen
+- `config.json` schreiben
+- **Arbeitsmappe mit Excel erzeugen**
 - Verknuepfung auf dem Desktop anlegen
 - Selbsttest fahren
 
 Am Ende steht entweder "einsatzbereit" oder eine kurze Liste dessen, was
-noch offen ist. Zum Starten dann die Desktop-Verknuepfung - fertig.
+noch offen ist. Gestartet wird danach ueber die Desktop-Verknuepfung.
+
+Eine Kurzfassung fuer Anwender liegt als `ANLEITUNG.txt` im Archiv.
 
 ### Sonderfaelle
 
-**Kein Internet am Zielrechner?** Zusaetzlich
-`lims_core-<version>-windows-x64.zip` samt `.sha256` vorab laden und das
-Skript von Hand mit dem Paket aufrufen:
+**Gemeinsamer Ordner statt lokal?** Zielordner ausdruecklich angeben:
 
-    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-Probenassistent" -Paket "D:\lims_core-0.4.0-windows-x64.zip"
+    powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "S:\Freigabe\LIMS"
 
-**Kein Excel auf diesem Rechner?** Die Einrichtung laeuft trotzdem durch und
-meldet die Mappe als offenen Punkt; erzeugen laesst sie sich dann auf einem
-Rechner mit Excel (Schritt 2 unten).
+**Kein Excel auf diesem Rechner?** Die Installation laeuft trotzdem durch
+und meldet die Mappe als offenen Punkt; erzeugen laesst sie sich dann auf
+einem Rechner mit Excel (Schritt 2 unten).
 
 **Repository ausgecheckt?** Dieselben Skripte liegen unter
-`packaging\windows\`.
+`packaging\windows\`. Ohne danebenliegendes `core\` laedt das Skript den
+Rechenkern aus dem aktuellen Release nach.
 
 ## Schritt 2: Arbeitsmappe nachholen
 
@@ -111,8 +116,8 @@ und Fotos.
 Die Desktop-Verknuepfung **LIMS-Probenassistent** anklicken (oder die
 XLSM im Arbeitsordner). Excel fragt nach Makros - diese zulassen.
 
-Zum Ausprobieren liegen im Repository unter `fixtures\synthetic\` fertige
-Beispieldateien; `klinik_digital.pdf` ergibt 14 Zeilen.
+Zum Ausprobieren liegt im Installationsordner `Beispiel-Arbeitsliste.pdf` -
+daraus entstehen 14 Zeilen.
 
 Im Blatt `Assistent`: **Dateien waehlen** > **Analyse starten**. Die Zeilen
 erscheinen im Blatt `Ergebnisse` in genau fuenf Spalten. Gelb heisst

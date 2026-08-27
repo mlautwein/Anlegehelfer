@@ -127,43 +127,43 @@ jobs:
           $manifest | ConvertTo-Json -Depth 3 | Set-Content -Encoding UTF8 (Join-Path $distDir "hashes.json")
           Write-Host ("Manifest: {0} Dateien" -f $manifest.Count)
 
-      - name: Paket schnueren (ZIP + SHA-256)
+      - name: Setup-Archiv schnueren (alles in einem)
         shell: pwsh
         env:
           VERSION: ${{ needs.guard.outputs.version }}
         run: |
           $ErrorActionPreference = "Stop"
+          # Bewusst EIN Archiv: Wer es herunterlaedt, soll nicht zwischen
+          # Varianten waehlen muessen, und die Installation soll ohne
+          # Internet auskommen. Der Rechenkern liegt deshalb mit drin.
           New-Item -ItemType Directory -Path release -Force | Out-Null
-          $zip = "release\lims_core-$env:VERSION-windows-x64.zip"
-          Compress-Archive -Path "dist\lims_core\*" -DestinationPath $zip -CompressionLevel Optimal
-          $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
-          "$hash  $(Split-Path $zip -Leaf)" | Set-Content -Encoding ASCII "$zip.sha256"
-          Write-Host "SHA-256 (core) $hash"
-
-          # Zweites Archiv: alles, was zum Aufsetzen und zum Bau der
-          # Arbeitsmappe gebraucht wird. Ohne das kommt niemand ans Ziel,
-          # der nur das Release herunterlaedt statt das Repository zu holen.
-          $stage = "einrichtung"
+          $stage = "setup"
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
           New-Item -ItemType Directory -Path "$stage\excel\vba-src" -Force | Out-Null
           New-Item -ItemType Directory -Path "$stage\docs" -Force | Out-Null
+
+          Copy-Item dist\lims_core "$stage\core" -Recurse
           Copy-Item packaging\windows\Installieren.cmd      $stage
           Copy-Item packaging\windows\einrichten.ps1        $stage
           Copy-Item packaging\windows\build_workbook.ps1    $stage
           Copy-Item packaging\windows\provision_offline.ps1 $stage
-          Copy-Item packaging\windows\LIESMICH.txt          $stage
+          Copy-Item packaging\windows\ANLEITUNG.txt         $stage
           Copy-Item excel\vba-src\*                         "$stage\excel\vba-src"
           Copy-Item excel\workbook-template\config.beispiel.json $stage
+          # Beispieldatei fuer den ersten Durchlauf - wer nur das Archiv
+          # hat, besitzt sonst keine Vorlage zum Ausprobieren.
+          Copy-Item fixtures\synthetic\klinik_digital.pdf "$stage\Beispiel-Arbeitsliste.pdf"
           foreach ($d in @("ERSTE_SCHRITTE.md", "BEDIENUNG.md", "EXCEL_SETUP.md",
                            "WINDOWS_BUILD.md", "ABNAHME_EXCEL2016.md",
                            "SICHERHEIT_DATENSCHUTZ.md")) {
             Copy-Item "docs\$d" "$stage\docs"
           }
-          $zip2 = "release\lims-probenassistent-$env:VERSION-einrichtung.zip"
-          Compress-Archive -Path "$stage\*" -DestinationPath $zip2 -CompressionLevel Optimal
-          $hash2 = (Get-FileHash -Algorithm SHA256 -Path $zip2).Hash.ToLower()
-          "$hash2  $(Split-Path $zip2 -Leaf)" | Set-Content -Encoding ASCII "$zip2.sha256"
-          Write-Host "SHA-256 (einrichtung) $hash2"
+
+          $zip = "release\LIMS-Probenassistent-$env:VERSION-Setup-Windows.zip"
+          Compress-Archive -Path "$stage\*" -DestinationPath $zip -CompressionLevel Optimal
+          $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
+          "$hash  $(Split-Path $zip -Leaf)" | Set-Content -Encoding ASCII "$zip.sha256"
+          Write-Host ("Setup-Archiv: {0} MB, SHA-256 {1}" -f [math]::Round((Get-Item $zip).Length/1MB), $hash)
           Remove-Item $stage -Recurse -Force
 
       - name: Releasenotizen aus CHANGELOG erzeugen

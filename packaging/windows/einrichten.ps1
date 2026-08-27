@@ -11,16 +11,18 @@
 #
 # Aufrufbeispiele:
 #   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Interaktiv
-#   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA"
-#   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "C:\LIMS-PA" -Paket "D:\lims_core-0.3.0-windows-x64.zip"
+#   powershell -ExecutionPolicy Bypass -File einrichten.ps1 -Ziel "S:\Freigabe\LIMS"
+#
+# Liegt ein Ordner core\ neben diesem Skript (Normalfall im Setup-Archiv),
+# wird dieser benutzt - die Installation braucht dann kein Internet.
 # =====================================================================
 
 [CmdletBinding()]
 param(
-    # Arbeitsordner. Ohne Angabe der Standard bzw. die Nachfrage.
+    # Arbeitsordner. Ohne Angabe: C:\LIMS-Probenassistent.
     [string]$Ziel = "",
 
-    # Bereits vorliegendes Release-ZIP. Ohne Angabe wird heruntergeladen.
+    # Release-ZIP. Ohne Angabe: mitgeliefertes core\, sonst Download.
     [string]$Paket = "",
 
     # Releasetag, falls nicht die neueste Version gewuenscht ist.
@@ -56,18 +58,21 @@ if ($Interaktiv) {
 
 # ---------------------------------------------------------------------
 Schritt "1/7 Arbeitsordner"
-if (-not $Ziel) {
-    if ($Interaktiv) {
-        $eingabe = Read-Host "Ordner [$standardZiel]"
-        $Ziel = if ($eingabe.Trim()) { $eingabe.Trim() } else { $standardZiel }
-    } else {
-        $Ziel = $standardZiel
-    }
-}
+# Bewusst ohne Rueckfrage: Der Normalfall soll ohne jede Eingabe
+# durchlaufen. Wer einen gemeinsamen Ordner braucht, gibt -Ziel an.
+if (-not $Ziel) { $Ziel = $standardZiel }
 $Ziel = [System.IO.Path]::GetFullPath($Ziel)
 if (-not (Test-Path $Ziel)) {
-    New-Item -ItemType Directory -Path $Ziel -Force | Out-Null
-    Gut "angelegt: $Ziel"
+    try {
+        New-Item -ItemType Directory -Path $Ziel -Force -ErrorAction Stop | Out-Null
+        Gut "angelegt: $Ziel"
+    } catch {
+        # Ohne Administratorrechte ist C:\ oft gesperrt - dann ins Profil.
+        $Ziel = Join-Path $env:LOCALAPPDATA "LIMS-Probenassistent"
+        New-Item -ItemType Directory -Path $Ziel -Force | Out-Null
+        Warnung "C:\ war nicht beschreibbar, nehme stattdessen:"
+        Gut "angelegt: $Ziel"
+    }
 } else {
     Gut "vorhanden: $Ziel"
 }
@@ -90,13 +95,24 @@ if ((Test-Path $coreDir) -and -not $Ueberschreiben) {
 Schritt "2/7 Paket bereitstellen"
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("lims-setup-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+$pruefsummenDatei = ""
 try {
-    if ($Paket) {
+    $mitgeliefert = Join-Path $PSScriptRoot "core\lims_core.exe"
+    if (-not $Paket -and (Test-Path $mitgeliefert)) {
+        # Normalfall: Der Rechenkern liegt im entpackten Setup-Ordner.
+        # Dann wird nichts heruntergeladen - die Installation braucht kein
+        # Internet und funktioniert auch in abgeschotteten Netzen.
+        $zip = ""
+        $quellOrdner = Split-Path $mitgeliefert -Parent
+        Gut "Rechenkern liegt bei, kein Download noetig"
+    } elseif ($Paket) {
         if (-not (Test-Path $Paket)) { throw "Paket nicht gefunden: $Paket" }
         $zip = (Resolve-Path $Paket).Path
+        $quellOrdner = ""
         Gut "lokales Paket: $zip"
         $pruefsummenDatei = "$zip.sha256"
     } else {
+        $quellOrdner = ""
         $api = if ($Version) {
             "https://api.github.com/repos/$repoSlug/releases/tags/$Version"
         } else {
@@ -124,7 +140,9 @@ try {
 
     # -----------------------------------------------------------------
     Schritt "3/7 Pruefsumme"
-    if ($pruefsummenDatei -and (Test-Path $pruefsummenDatei)) {
+    if ($quellOrdner) {
+        Gut "entfaellt - Integritaet wird unten am Hash-Manifest geprueft"
+    } elseif ($pruefsummenDatei -and (Test-Path $pruefsummenDatei)) {
         $soll = ((Get-Content $pruefsummenDatei -Raw).Trim() -split '\s+')[0].ToLower()
         $ist = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
         if ($soll -ne $ist) {
@@ -136,12 +154,17 @@ try {
     }
 
     # -----------------------------------------------------------------
-    Schritt "4/7 Entpacken"
+    Schritt "4/7 Rechenkern bereitstellen"
     if (Test-Path $coreDir) { Remove-Item $coreDir -Recurse -Force }
-    Expand-Archive -Path $zip -DestinationPath $coreDir -Force
+    if ($quellOrdner) {
+        Copy-Item -Path $quellOrdner -Destination $coreDir -Recurse -Force
+        Gut "kopiert nach: $coreDir"
+    } else {
+        Expand-Archive -Path $zip -DestinationPath $coreDir -Force
+        Gut "entpackt nach: $coreDir"
+    }
     $exe = Join-Path $coreDir "lims_core.exe"
-    if (-not (Test-Path $exe)) { throw "lims_core.exe fehlt im Paket - Paket beschaedigt?" }
-    Gut "entpackt nach: $coreDir"
+    if (-not (Test-Path $exe)) { throw "lims_core.exe fehlt - Paket unvollstaendig?" }
 
     $manifestPfad = Join-Path $coreDir "hashes.json"
     if (Test-Path $manifestPfad) {

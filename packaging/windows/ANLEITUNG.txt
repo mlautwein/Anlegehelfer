@@ -1,0 +1,83 @@
+LIMS-Probenassistent - Installation
+===================================
+
+In diesem Ordner steht alles, was gebraucht wird. Es muss nichts
+zusaetzlich heruntergeladen werden, auch kein Internet.
+
+
+So wird installiert
+-------------------
+
+  Doppelklick auf:   Installieren.cmd
+
+Das ist alles. Es dauert etwa eine Minute.
+
+Falls Windows warnt ("Der Computer wurde durch Windows geschuetzt"):
+auf "Weitere Informationen" klicken, dann auf "Trotzdem ausfuehren".
+Diese Meldung kommt, weil die Datei aus dem Internet stammt und nicht
+kostenpflichtig signiert ist - sie bedeutet nicht, dass etwas nicht
+stimmt.
+
+Installiert wird nach C:\LIMS-Probenassistent. Ist dieser Ordner
+gesperrt, weicht das Programm von selbst in den eigenen Benutzerordner
+aus. Ausserhalb dieses einen Ordners wird nichts veraendert.
+
+
+So wird gestartet
+-----------------
+
+Nach der Installation liegt auf dem Desktop die Verknuepfung
+
+  LIMS-Probenassistent
+
+Doppelklick darauf oeffnet Excel. Wenn Excel oben nach Makros fragt:
+zulassen - ohne Makros funktioniert die Bedienung nicht.
+
+Dann im Blatt "Assistent":
+
+  1. "Dateien waehlen"  - PDF, Fotos oder Excel-Listen aussuchen
+  2. "Analyse starten"  - kurz warten
+  3. Im Blatt "Ergebnisse" stehen die fuenf Spalten.
+     Gelb heisst: bitte pruefen. Korrekturen einfach ueberschreiben,
+     das Programm lernt daraus.
+  4. Je Spalte auf "Kopieren" und im LIMS einfuegen.
+
+Ausfuehrlich: docs\BEDIENUNG.md
+
+
+Wenn etwas nicht klappt
+-----------------------
+
+"Es fehlt noch die Arbeitsmappe"
+  Die Excel-Datei konnte nicht automatisch erzeugt werden. Fast immer
+  fehlt dafuer in Excel ein Haken:
+
+    Datei > Optionen > Trust Center > Einstellungen fuer das
+    Trust Center > Makroeinstellungen >
+    [x] Zugriff auf das VBA-Projektobjektmodell vertrauen
+
+  Haken setzen, Excel schliessen, Installieren.cmd noch einmal
+  doppelklicken. Danach kann der Haken wieder weg.
+
+Doppelklick auf lims_core.exe bewirkt nichts
+  Das ist richtig so. Diese Datei ist der Rechenteil ohne eigenes
+  Fenster; bedient wird ueber die Excel-Mappe.
+
+Umlaute in eingescannten Listen sind falsch (Teekuche statt Teekueche)
+  Betrifft nur Scans und Fotos, nicht PDF- oder Excel-Dateien. Die
+  betroffenen Felder sind gelb markiert. Wer es sauber braucht:
+  docs\ERSTE_SCHRITTE.md, Abschnitt "Deutsche Umlaute in Scans".
+
+Excel meldet, Makros seien blockiert
+  Rechtsklick auf LIMS-Probenassistent.xlsm > Eigenschaften > unten
+  bei "Sicherheit" den Haken "Zulassen" setzen > OK.
+
+
+Gut zu wissen
+-------------
+
+- Das Programm arbeitet vollstaendig offline. Es sendet nichts ins
+  Internet; ein eingebauter Waechter blockiert das zur Laufzeit.
+- Eingelesene Dokumente werden nicht dauerhaft kopiert.
+- Das Werkzeug ist eine Hilfe beim Abtippen, keine Freigabe. Verbindlich
+  sind die Daten erst, wenn sie geprueft im LIMS stehen.

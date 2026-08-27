@@ -10,6 +10,37 @@ Normalisierung (`NORMALIZER_VERSION`), Lernkern (`LEARNER_VERSION`).
 
 ## [Unveroeffentlicht]
 
+## [0.5.0] - 2026-08-26
+
+Auslieferung fuer Laien: ein Archiv, ein Doppelklick, keine Rueckfrage,
+kein Internet.
+
+### Geaendert
+
+- **Nur noch EIN Release-Archiv**: `LIMS-Probenassistent-<version>-Setup-Windows.zip`.
+  Bisher musste man zwischen Einrichtungs- und Kernarchiv waehlen - eine
+  Entscheidung, die niemand treffen koennen muss.
+- **Der Rechenkern liegt im Archiv.** Die Installation laedt nichts mehr
+  nach und funktioniert damit ohne Internet und in abgeschotteten Netzen.
+  Statt Download und Entpacken wird der beiliegende Ordner kopiert und
+  gegen das Hash-Manifest geprueft; die separate ZIP-Pruefsumme entfaellt
+  dadurch.
+- **Keine Rueckfrage mehr nach dem Zielordner.** Installiert wird nach
+  `C:\LIMS-Probenassistent`; scheitert das an fehlenden Rechten, weicht die
+  Installation selbsttaetig in `%LOCALAPPDATA%` aus. Ein gemeinsamer Ordner
+  laesst sich weiterhin mit `-Ziel` waehlen.
+
+### Hinzugefuegt
+
+- `ANLEITUNG.txt` im Archiv - Kurzfassung in Alltagssprache: installieren,
+  starten, die vier haeufigsten Stolpersteine. Ohne Fachbegriffe.
+- `Beispiel-Arbeitsliste.pdf` liegt bei, damit der erste Durchlauf ohne
+  eigene Dokumente moeglich ist (ergibt 14 Zeilen).
+- Der Windows-CI-Job stellt den Setup-Ordner wie im Release zusammen und
+  faehrt genau den Aufruf, den `Installieren.cmd` ausloest - der
+  Anwenderweg wird also bei jedem Push getestet, nicht nur der
+  Entwicklerweg.
+
 ## [0.4.0] - 2026-08-26
 
 Installation auf zwei Klicks verkuerzt: Archiv entpacken,
@@ -217,7 +248,8 @@ Normalisierung `norm-1.0`, Lernkern `learn-1.0`.
   sind dagegen unempfindlich; die dokumentierten Benchmarkzahlen beziehen
   sich auf den unter Linux erzeugten Korpus.
 
-[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.4.0...HEAD
+[Unveroeffentlicht]: https://github.com/mlautwein/Anlegehelfer/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/mlautwein/Anlegehelfer/releases/tag/v0.2.0

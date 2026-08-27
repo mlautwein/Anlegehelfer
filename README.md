@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml/badge.svg)](https://github.com/mlautwein/Anlegehelfer/actions/workflows/ci.yml)
 
-**Version 0.4.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
+**Version 0.5.0** (Vorabversion - die manuelle Excel-2016-Abnahme ist noch
 offen) · Jobvertrag `1.0` · [Erste Schritte](docs/ERSTE_SCHRITTE.md) ·
 [Changelog](CHANGELOG.md) ·
 [Releases](https://github.com/mlautwein/Anlegehelfer/releases)
@@ -64,14 +64,16 @@ erzeugen.
 
 Auf einem Windows-Rechner mit Excel sind es zwei Klicks:
 
-1. `lims-probenassistent-<version>-einrichtung.zip` von der
+1. `LIMS-Probenassistent-<version>-Setup-Windows.zip` von der
    [Releases-Seite](https://github.com/mlautwein/Anlegehelfer/releases) laden
    und entpacken.
 2. `Installieren.cmd` doppelklicken.
 
-Das erledigt alles: Rechenkern laden und pruefen, `config.json` schreiben,
-die Arbeitsmappe mit Excel erzeugen, Desktop-Verknuepfung anlegen,
-Selbsttest fahren. Ausfuehrlich: `docs/ERSTE_SCHRITTE.md`.
+Ein einziges Archiv, der Rechenkern liegt darin - die Installation laedt
+nichts nach und braucht kein Internet. Sie fragt nichts, kopiert den Kern,
+prueft ihn gegen das Hash-Manifest, schreibt `config.json`, erzeugt die
+Arbeitsmappe mit Excel, legt eine Desktop-Verknuepfung an und faehrt einen
+Selbsttest. Ausfuehrlich: `docs/ERSTE_SCHRITTE.md`.
 
 ## Windows-Bereitstellung im Detail
 
@@ -108,10 +110,11 @@ von der Datei ab, schlaegt der CI-Schritt "Versionsbindung pruefen" fehl -
 dann das Artefakt `constraints-windows-x64` herunterladen und die Datei
 aktualisieren.
 
-Ergebnis des Workflows: GitHub-Release mit
-`lims_core-<version>-windows-x64.zip` (portable onedir-EXE inklusive
-`hashes.json`) und zugehoeriger `.sha256`-Pruefsumme. Versionen `0.y.z` und
-Tags mit Suffix werden automatisch als Vorabversion markiert.
+Ergebnis des Workflows: ein GitHub-Release mit genau einem Archiv,
+`LIMS-Probenassistent-<version>-Setup-Windows.zip` (Rechenkern inklusive
+`hashes.json`, Installer, VBA-Quellen, Anleitungen, Beispieldatei) und
+zugehoeriger `.sha256`-Pruefsumme. Versionen `0.y.z` und Tags mit Suffix
+werden automatisch als Vorabversion markiert.
 
 ## Wichtige Grundsaetze
 

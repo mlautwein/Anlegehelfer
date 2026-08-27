@@ -121,11 +121,12 @@ jobs:
           if (-not $resp.ok) { throw "analyze-Smoke fehlgeschlagen: $($resp.error.message)" }
           if ($resp.result.rows.Count -lt 10) { throw "zu wenige Zeilen im Smoke-Test" }
           Write-Host ("Smoke ok: {0} Zeilen" -f $resp.result.rows.Count)
-      - name: Einrichtungsskript auf echtem Windows testen
+      - name: Setup wie beim Anwender testen (echtes Windows)
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          # Paket schnueren wie im Release, inklusive Hash-Manifest.
+          # Setup-Ordner wie im Release zusammenstellen: Rechenkern liegt bei,
+          # also darf nichts heruntergeladen werden.
           $distDir = (Resolve-Path "dist\lims_core").Path
           $manifest = @{}
           Get-ChildItem -Path $distDir -Recurse -File | ForEach-Object {
@@ -133,28 +134,34 @@ jobs:
             $manifest[$rel] = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash.ToLower()
           }
           $manifest | ConvertTo-Json -Depth 3 | Set-Content -Encoding UTF8 (Join-Path $distDir "hashes.json")
-          New-Item -ItemType Directory -Path ci-paket -Force | Out-Null
-          $zip = "ci-paket\lims_core-ci-windows-x64.zip"
-          Compress-Archive -Path "dist\lims_core\*" -DestinationPath $zip -Force
-          $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
-          "$hash  $(Split-Path $zip -Leaf)" | Set-Content -Encoding ASCII "$zip.sha256"
 
-          # Genau der Aufruf, der in docs/ERSTE_SCHRITTE.md steht.
+          $stage = Join-Path $env:RUNNER_TEMP "setup"
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          New-Item -ItemType Directory -Path "$stage\excel\vba-src" -Force | Out-Null
+          Copy-Item dist\lims_core "$stage\core" -Recurse
+          Copy-Item packaging\windows\Installieren.cmd      $stage
+          Copy-Item packaging\windows\einrichten.ps1        $stage
+          Copy-Item packaging\windows\build_workbook.ps1    $stage
+          Copy-Item packaging\windows\ANLEITUNG.txt         $stage
+          Copy-Item excel\vba-src\*                         "$stage\excel\vba-src"
+
+          # Genau der Aufruf, den Installieren.cmd ausloest - nur mit
+          # gesetztem Zielordner, damit C:\ des Runners unberuehrt bleibt.
           $ziel = Join-Path $env:RUNNER_TEMP "LIMS-PA"
-          # Ohne Excel auf dem Runner: der Mappenschritt muss sauber
-          # uebersprungen werden, statt die Einrichtung scheitern zu lassen.
-          & powershell -ExecutionPolicy Bypass -File packaging\windows\einrichten.ps1 -Ziel $ziel -Paket $zip
+          & powershell -ExecutionPolicy Bypass -File "$stage\einrichten.ps1" -Ziel $ziel -Interaktiv
           if ($LASTEXITCODE -ne 0) { throw "einrichten.ps1 ist fehlgeschlagen" }
 
           foreach ($p in @("config.json", "core\lims_core.exe", "core\hashes.json")) {
             if (-not (Test-Path (Join-Path $ziel $p))) { throw "nach der Einrichtung fehlt: $p" }
           }
-          # Das Latin-Modell fehlt hier absichtlich: OCR muss trotzdem laufen
-          # (Rueckfall auf die gebuendelten Standardmodelle).
+          # Ohne Excel auf dem Runner muss der Mappenschritt sauber
+          # uebersprungen werden, statt die Einrichtung scheitern zu lassen.
+          # Ohne Latin-Modell muss OCR auf die Standardmodelle zurueckfallen.
           $h = & (Join-Path $ziel "core\lims_core.exe") --config (Join-Path $ziel "config.json") health | ConvertFrom-Json
           if (-not $h.result.ocr.available) { throw "OCR nicht verfuegbar: $($h.result.ocr.detail)" }
-          Write-Host ("Einrichtung ok - OCR: {0}" -f $h.result.ocr.detail)
-          Remove-Item ci-paket -Recurse -Force
+          Write-Host ("Setup ok - OCR: {0}" -f $h.result.ocr.detail)
+          Remove-Item $stage, $ziel -Recurse -Force
+
       - name: Artefakt hochladen
         uses: actions/upload-artifact@v7
         with:
